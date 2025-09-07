@@ -7,25 +7,15 @@ ruangan_collection = db['ruangan']
 
 
 
-# def generate_qris(kode_ruangan):
-#     url = f"{request.host_url}scan/{kode_ruangan}"
-#     img = qrcode.make(url)
-
-#     path = f"static/qris/{kode_ruangan}.png"
-#     os.makedirs(os.path.dirname(path), exist_ok=True)
-#     img.save(path)
-#     return path
-
-BASE_URL = "http://10.20.170.31:5000"  # ganti dengan IPv4 dari ipconfig
-
 def generate_qris(kode_ruangan):
-    url = f"{BASE_URL}/scan/{kode_ruangan}"
+    url = f"{request.host_url}scan/{kode_ruangan}"
     img = qrcode.make(url)
 
     path = f"static/qris/{kode_ruangan}.png"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     img.save(path)
     return path
+
 
 def tambah_ruangan(nama_ruangan, kode_ruangan, kode_lokasi):
     

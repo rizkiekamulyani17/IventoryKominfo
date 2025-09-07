@@ -47,7 +47,7 @@
             <th>Kondisi</th>
             <th>Harga Beli</th>
             <th>Keterangan</th>
-            <th>QRIS</th>
+            <!--<th>QRIS</th>-->
             <th>Aksi</th>
         </tr>
     </thead>
@@ -76,14 +76,14 @@
             <td>{{ b['kondisi'] }}</td>
             <td>{{ "%.2f"|format(b['harga_beli']|default(0)) }}</td>
             <td>{{ b.keterangan or '-' }}</td>
-            <td>
+            <!--<td>
                 {% if b['qris_path'] %}
                     <img src="{{ url_for('static', filename=b['qris_path']|replace('static/', '')) }}" 
                          width="70" style="border-radius:5px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
                 {% else %}
                     <span class="text-muted">Belum ada QR</span>
                 {% endif %}
-            </td>
+            </td>-->
             <td>
                 <a href="{{ url_for('barang.edit', barang_id=b['_id']) }}" class="btn btn-warning btn-sm">Edit</a>
                 <a href="{{ url_for('barang.hapus', barang_id=b['_id']) }}" class="btn btn-danger btn-sm"
