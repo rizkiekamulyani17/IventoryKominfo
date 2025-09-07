@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">📦 Semua Barang</h2>
+
+    <!-- ✅ Form Pencarian Satu Kotak -->
+    <form method="get" action="{{ url_for('barang.all_barang') }}" class="row mb-3">
+        <div class="col-md-10">
+            <input type="text" name="q" value="{{ request.args.get('q','') }}" 
+                   class="form-control" placeholder="Cari barang (nama, merk, tahun, ruangan)">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">🔍 Cari</button>
+        </div>
+    </form>
+
+    <p><strong>Total Barang:</strong> {{ barang|length }}</p>
+
+   <table class="table table-bordered table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>No</th>
+            <th>Foto</th> <!-- ✅ Tambahkan kolom foto -->
+            <th>Nama / Jenis Barang</th>
+            <th>Kode Barang</th>
+            <th>Merk / Type</th>
+            <th>No. Seri Pabrik</th>
+            <th>Ukuran</th>
+            <th>Bahan</th>
+            <th>Tahun</th>
+            <th>Ruangan</th>
+            <th>Kondisi</th>
+            <th>Harga Beli</th>
+            <th>Keterangan</th>
+            <th>QRIS</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in barang %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+    {% if b.foto %}
+        <img src="{{ url_for('static', filename=b['foto'].replace('static/','')) }}"
+             alt="Foto {{ b['nama_barang'] }}" 
+             width="200" style="border:none; border-radius:0; box-shadow:none;">
+    {% else %}
+        <span class="text-muted">Tidak ada foto</span>
+    {% endif %}
+</td>
+
+            <td>{{ b['nama_barang'] }}</td>
+            <td>{{ b['kode_barang'] }}</td>
+            <td>{{ b['merk'] }}</td>
+            <td>{{ b['no_seri'] }}</td>
+            <td>{{ b['ukuran'] }}</td>
+            <td>{{ b['bahan'] }}</td>
+            <td>{{ b['tahun'] }}</td>
+            <td>{{ b['nama_ruangan'] }}</td>
+            <td>{{ b['kondisi'] }}</td>
+            <td>{{ "%.2f"|format(b['harga_beli']|default(0)) }}</td>
+            <td>{{ b.keterangan or '-' }}</td>
+            <td>
+                {% if b['qris_path'] %}
+                    <img src="{{ url_for('static', filename=b['qris_path']|replace('static/', '')) }}" 
+                         width="70" style="border-radius:5px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                {% else %}
+                    <span class="text-muted">Belum ada QR</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('barang.edit', barang_id=b['_id']) }}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{{ url_for('barang.hapus', barang_id=b['_id']) }}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Yakin ingin menghapus barang ini?')">Hapus</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="15" class="text-center text-muted">Tidak ada data ditemukan</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

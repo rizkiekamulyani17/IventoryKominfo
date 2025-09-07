@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Tambah Barang</h4>
+                </div>
+                <div class="card-body">
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, msg in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ msg }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- ✅ hanya satu form -->
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Nama Barang</label>
+                            <input type="text" name="nama_barang" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Merek / Model</label>
+                            <input type="text" name="merk" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">No. Seri Pabrik</label>
+                            <input type="text" name="no_seri" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ukuran</label>
+                            <input type="text" name="ukuran" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bahan</label>
+                            <input type="text" name="bahan" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tahun Pembuatan / Pembelian</label>
+                            <input type="text" name="tahun" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">No Kode Barang</label>
+                            <input type="text" name="kode_barang_manual" class="form-control" placeholder="Contoh: 13.00" required>
+                            <small class="text-muted">Kode barang akan otomatis menjadi 13.01, 13.02, dst sesuai jumlah</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah Barang</label>
+                            <input type="number" name="jumlah" class="form-control" value="1" min="1" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Harga Beli / Perolehan</label>
+                            <input type="number" name="harga_beli" class="form-control" value="0" min="0">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Masuk ke Ruangan</label>
+                            <select name="ruangan_id" class="form-select" required>
+                                <option value="">-- Pilih Ruangan --</option>
+                                {% for r in ruangan_list %}
+                                    <option value="{{ r['_id'] }}">{{ r['nama_ruangan'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Kondisi Barang</label>
+                            <select name="kondisi" class="form-select" required>
+                                <option value="Baik">Baik</option>
+                                <option value="Kurang Baik">Kurang Baik</option>
+                                <option value="Rusak Berat">Rusak Berat</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Keterangan Setelah Keadaan Barang</label>
+                            <textarea name="keterangan" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <!-- ✅ input foto -->
+                        <div class="mb-3">
+                            <label class="form-label">Foto Barang</label>
+                            <input type="file" name="foto" class="form-control" accept="image/*" capture="environment" onchange="previewImage(event)">
+                            <small class="text-muted">Bisa pilih dari file atau ambil langsung kamera.</small>
+                            <div class="mt-2">
+                                <img id="preview" src="" alt="Preview Foto" style="max-height: 150px; display:none;" class="img-thumbnail">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> Tambah Barang</button>
+                            <a href="{{ url_for('barang.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Kembali</a>
+                        </div>
+                    </form>
+
+                    <script>
+                    function previewImage(event) {
+                        const img = document.getElementById('preview');
+                        img.src = URL.createObjectURL(event.target.files[0]);
+                        img.style.display = 'block';
+                    }
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

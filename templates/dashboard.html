@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="margin-bottom: 30px; color:#333;">Dashboard Inventory Kominfo</h2>
+
+<div style="display: flex; gap: 25px; flex-wrap: wrap; justify-content:flex-start;">
+
+    <!-- Card Ruangan -->
+    <a href="{{ url_for('dashboard_all_ruangan') }}" style="text-decoration:none; color:black; flex:0 1 280px;">
+        <div style="display:flex; align-items:center; 
+                    background: linear-gradient(135deg, #6a11cb, #2575fc); 
+                    color:white; border-radius: 20px; padding: 25px; 
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    transition: transform 0.3s, box-shadow 0.3s; cursor:pointer;">
+            <div style="font-size:55px; margin-right:20px; animation: bounce 1.2s infinite;">🏢</div>
+            <div>
+                <h3 style="margin:0 0 5px 0; font-weight:600;">Ruangan</h3>
+                <p style="font-size:30px; font-weight:bold; margin:0;">{{ ruangan|length }}</p>
+            </div>
+        </div>
+    </a>
+
+    <!-- Card Barang -->
+    <a href="{{ url_for('dashboard_all_barang') }}" style="text-decoration:none; color:black; flex:0 1 280px;">
+        <div style="display:flex; align-items:center; 
+                    background: linear-gradient(135deg, #ff416c, #ff4b2b); 
+                    color:white; border-radius: 20px; padding: 25px; 
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    transition: transform 0.3s, box-shadow 0.3s; cursor:pointer;">
+            <div style="font-size:55px; margin-right:20px; animation: bounce 1.2s infinite;">📦</div>
+            <div>
+                <h3 style="margin:0 0 5px 0; font-weight:600;">Barang</h3>
+                <p style="font-size:30px; font-weight:bold; margin:0;">{{ barang|length }}</p>
+            </div>
+        </div>
+    </a>
+
+</div>
+
+<!-- Grafik Jumlah Barang per Ruangan -->
+<div style="margin-top:50px; max-width:900px; background:white; border-radius:20px; padding:20px; box-shadow:0 8px 25px rgba(0,0,0,0.2);">
+    <h3 style="margin-bottom:20px; color:#333;">Jumlah Barang per Ruangan</h3>
+    <canvas id="barangChart"></canvas>
+</div>
+
+<style>
+a div:hover {
+    transform: translateY(-10px) scale(1.08);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    transition: all 0.3s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('barangChart').getContext('2d');
+
+const gradientStroke = ctx.createLinearGradient(0, 0, 0, 400);
+gradientStroke.addColorStop(0, 'rgba(78,115,223,1)');
+gradientStroke.addColorStop(1, 'rgba(78,115,223,0.2)');
+
+const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+gradientFill.addColorStop(0, 'rgba(78,115,223,0.4)');
+gradientFill.addColorStop(1, 'rgba(78,115,223,0)');
+
+const barangChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [{% for r in ruangan %}'{{ r.nama_ruangan }}',{% endfor %}],
+        datasets: [{
+            label: 'Jumlah Barang',
+            data: [{% for r in ruangan %}{{ r.total_barang|default(0) }},{% endfor %}],
+            fill: true,
+            backgroundColor: gradientFill,
+            borderColor: gradientStroke,
+            borderWidth: 4,
+            tension: 0.4,
+            pointBackgroundColor: '#4e73df',
+            pointBorderColor: '#fff',
+            pointRadius: 7,
+            pointHoverRadius: 9,
+            pointHoverBackgroundColor: '#ff6384',
+            pointHoverBorderColor: '#fff',
+            pointStyle: 'circle'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: { font: { size: 14, weight:'bold' } }
+            },
+            tooltip: { mode: 'index', intersect: false }
+        },
+        interaction: { mode: 'nearest', axis: 'x', intersect: false },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(200,200,200,0.2)' } },
+            x: { grid: { color: 'rgba(200,200,200,0.2)' } }
+        }
+    }
+});
+</script>
+
+{% endblock %}

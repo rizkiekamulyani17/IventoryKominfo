@@ -1,0 +1,9 @@
+Flask==3.0.3
+Werkzeug==3.0.3
+pymongo==4.10.1
+bson==0.5.10
+fpdf==1.7.2
+qrcode[pil]==7.4.2
+Pillow==10.4.0
+python-dotenv==1.0.1
+itsdangerous==2.2.0

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="font-family: Arial, sans-serif; margin:20px;">
+    <h2 style="margin-bottom: 10px; color:#333;">Detail Barang: {{ barang['nama_barang'] }}</h2>
+    <p style="margin-bottom:15px; color:#555;">Kode Barang: <strong>{{ barang['kode_barang'] }}</strong></p>
+
+    <!-- QR Code Barang -->
+    <div style="margin-bottom:15px;">
+        <img src="{{ url_for('static', filename='qris/' + barang['kode_barang'] + '.png') }}" 
+             width="120" style="border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+    </div>
+
+    <!-- Tombol Download QRIS -->
+    {% if session.get('username') %}
+    <div style="margin-bottom:25px;">
+        <a href="{{ url_for('barang.download_qris', barang_id=barang['_id']) }}" 
+           style="text-decoration:none; color:white; background: linear-gradient(135deg, #ff416c, #ff4b2b); 
+                  padding:8px 16px; border-radius:6px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2); 
+                  transition: all 0.3s;">
+            Download QRIS
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Tabel Informasi Barang -->
+    <table style="width:100%; border-collapse: collapse; box-shadow:0 4px 12px rgba(0,0,0,0.1); font-family:Arial, sans-serif;">
+        <thead>
+            <tr style="background: linear-gradient(135deg, #6a11cb, #2575fc); color:black; font-weight:bold;">
+                <th style="padding:12px; text-align:left;">Atribut</th>
+                <th style="padding:12px; text-align:left;">Detail</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">No</td>
+                <td style="padding:10px;">{{ barang['no'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Kode Barang</td>
+                <td style="padding:10px;">{{ barang['kode_barang'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Nama Barang</td>
+                <td style="padding:10px;">{{ barang['nama_barang'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Merk/Model</td>
+                <td style="padding:10px;">{{ barang['merk'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">No. Seri Pabrik</td>
+                <td style="padding:10px;">{{ barang['no_seri'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Ukuran</td>
+                <td style="padding:10px;">{{ barang['ukuran'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Bahan</td>
+                <td style="padding:10px;">{{ barang['bahan'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Tahun Pembuatan / Pembelian</td>
+                <td style="padding:10px;">{{ barang['tahun'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Jumlah</td>
+                <td style="padding:10px;">{{ barang['jumlah'] }}</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Harga Beli</td>
+                <td style="padding:10px;">Rp {{ "{:,.0f}".format(barang['harga_beli']|default(0)) }}</td>
+            </tr>
+            
+            <tr>
+                <td style="padding:10px; font-weight:bold;">Keadaan Barang</td>
+                <td style="padding:10px;">{{ barang['kondisi'] }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Tombol Kembali -->
+    <div style="margin-top:20px;">
+        <a href="{{ url_for('barang.index') }}" 
+           style="text-decoration:none; color:white; background:#007bff; padding:8px 16px; border-radius:6px;
+                  font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s;">
+            Kembali ke Daftar Barang
+        </a>
+    </div>
+</div>
+
+<style>
+tbody tr:nth-child(odd) {
+    background-color: #f2f2f7;
+}
+tbody tr:nth-child(even) {
+    background-color: #e6e6fa;
+}
+tbody tr:hover {
+    background-color: rgba(106,17,203,0.1);
+}
+a:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+thead th {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
+{% endblock %}

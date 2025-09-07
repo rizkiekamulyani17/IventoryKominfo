@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ akun and 'Edit Akun' or 'Tambah Akun' }}</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label>Username</label>
+            <input type="text" name="username" value="{{ akun.username if akun else '' }}" class="form-control" required>
+        </div>
+        {% if not akun %}
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        {% endif %}
+        <div class="mb-3">
+            <label>Role</label>
+            <select name="role" class="form-control">
+                <option value="user" {% if akun and akun.role == "user" %}selected{% endif %}>User</option>
+                <option value="admin" {% if akun and akun.role == "admin" %}selected{% endif %}>Admin</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Simpan</button>
+        <a href="{{ url_for('akun.list_akun') }}" class="btn btn-secondary">Kembali</a>
+    </form>
+</div>
+{% endblock %}

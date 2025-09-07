@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>📑 Daftar Akun</h2>
+    <a href="{{ url_for('akun.tambah_akun') }}" class="btn btn-primary mb-3">+ Tambah Akun</a>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in akun_list %}
+            <tr>
+                <td>{{ a.username }}</td>
+                <td>{{ a.role }}</td>
+                <td>
+                    <a href="{{ url_for('akun.edit_akun', akun_id=a._id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form action="{{ url_for('akun.hapus_akun', akun_id=a._id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus?')">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

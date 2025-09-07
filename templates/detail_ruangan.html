@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Detail Ruangan: {{ ruangan['nama_ruangan'] }}</h2>
+    <p><strong>Kode Ruangan:</strong> {{ ruangan['kode_ruangan'] }}</p>  <!-- ✅ -->
+<p><strong>Kode Lokasi:</strong> {{ ruangan['kode_lokasi'] }}</p>    <!-- ✅ kalau mau tampilkan juga -->   
+
+    <!-- QR Ruangan -->
+    <div class="mb-3">
+        <img src="{{ url_for('static', filename='qris/' + ruangan['kode_ruangan'] + '.png') }}" 
+             width="120" style="border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+    </div>
+
+    <!-- Tombol Download QRIS Ruangan & Semua Barang -->
+    {% if session.get('username') %}
+    <div class="mb-4">
+        <a href="{{ url_for('ruangan.download_qris_ruangan', ruangan_id=ruangan['_id']) }}" 
+           class="btn btn-danger">Download QRIS Ruangan</a>
+        <a href="{{ url_for('ruangan.download_qris_pdf', ruangan_id=ruangan['_id']) }}" 
+           class="btn btn-success">Download Semua QRIS Barang</a>
+           <a href="{{ url_for('ruangan.download_data_pdf', ruangan_id=ruangan['_id']) }}" 
+   class="btn btn-primary">Download Data Barang (PDF)</a>
+
+    </div>
+    {% endif %}
+    
+    <!-- Form Pencarian -->
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Cari kode, nama, merk, atau tahun" 
+               value="{{ request.args.get('search', '') }}">
+        <button type="submit" class="btn btn-primary">Cari</button>
+        {% if request.args.get('search') %}
+        <a href="{{ url_for('ruangan.detail', ruangan_id=ruangan['_id']) }}" class="btn btn-secondary">Reset</a>
+        {% endif %}
+    </div>
+</form>
+
+    <!-- Tabel Barang -->
+   <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>No</th>
+            <th>Foto</th> <!-- ✅ Tambah kolom foto -->
+            <th>Kode Barang</th>
+            <th>Nama Barang</th>
+            <th>Merk</th>
+            <th>No Seri</th>
+            <th>Ukuran</th>
+            <th>Bahan</th>
+            <th>Tahun</th>
+            <th>Kondisi</th>
+            <th>Harga Beli</th>
+            <th>Keterangan</th>
+            <th>QRIS</th>
+            {% if session.get('username') %}
+            <th>Aksi</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for b in barang %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+                {% if b.foto %}
+                    <img src="{{ url_for('static', filename=b['foto'].replace('static/','')) }}"
+                         alt="Foto {{ b['nama_barang'] }}"
+                         width="120" style="border:none; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                {% else %}
+                    <span class="text-muted">Tidak ada foto</span>
+                {% endif %}
+            </td>
+            <td>{{ b['kode_barang'] }}</td>
+            <td>{{ b['nama_barang'] }}</td>
+            <td>{{ b['merk'] }}</td>
+            <td>{{ b['no_seri'] }}</td>
+            <td>{{ b['ukuran'] }}</td>
+            <td>{{ b['bahan'] }}</td>
+            <td>{{ b['tahun'] }}</td>
+            <td>{{ b['kondisi'] }}</td>
+            <td>Rp {{ "{:,.0f}".format(b['harga_beli']) }}</td>
+            <td>{{ b.keterangan or '-' }}</td>
+            <td>
+                <img src="{{ url_for('static', filename='qris/' + b['kode_barang'] + '.png') }}" 
+                     width="60" style="border-radius:5px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+            </td>
+            {% if session.get('username') %}
+            <td>
+                <a href="{{ url_for('barang.edit_kondisi', barang_id=b['_id']) }}" 
+                   class="btn btn-sm btn-warning">Edit Kondisi</a>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+    <!-- Tombol Kembali -->
+    <a href="{{ url_for('ruangan.index') }}" class="btn btn-secondary mt-3">Kembali</a>
+</div>
+{% endblock %}

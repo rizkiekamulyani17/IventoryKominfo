@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="font-family: Arial, sans-serif; margin:20px; max-width:500px;">
+    <h2 style="color:#333; margin-bottom:20px;">Edit Kondisi Barang: {{ barang['nama_barang'] }}</h2>
+
+    <form method="POST" style="background:#f9f9f9; padding:20px; border-radius:10px; 
+                                box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <div style="margin-bottom:15px;">
+            <label for="kondisi" style="display:block; font-weight:600; margin-bottom:8px;">Kondisi Barang:</label>
+            <select name="kondisi" id="kondisi" 
+                    style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+                <option value="Baik" {% if barang['kondisi'] == 'Baik' %}selected{% endif %}>Baik</option>
+                <option value="Kurang Baik" {% if barang['kondisi'] == 'Kurang Baik' %}selected{% endif %}>Kurang Baik</option>
+                <option value="Rusak Berat" {% if barang['kondisi'] == 'Rusak Berat' %}selected{% endif %}>Rusak Berat</option>
+            </select>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button type="submit" 
+                    style="flex:1; background: linear-gradient(135deg, #6a11cb, #2575fc); color:white; 
+                           padding:10px 0; border:none; border-radius:6px; font-weight:600; cursor:pointer;
+                           box-shadow:0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s;">
+                Simpan
+            </button>
+            <a href="{{ url_for('barang.index') }}" 
+               style="flex:1; text-align:center; text-decoration:none; color:white; background:#dc3545; 
+                      padding:10px 0; border-radius:6px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2);
+                      transition: all 0.3s;">
+                Batal
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+button:hover, a:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="margin-bottom: 25px; color:#222; font-weight:700; text-align:center;">
+    Semua Ruangan
+</h2>
+
+<div class="ruangan-grid">
+    {% for r in ruangan %}
+    <div class="ruangan-card">
+        <h3>{{ r['nama_ruangan'] }}</h3>
+        <p>Kode Ruangan: <strong>{{ r['kode_ruangan'] }}</strong></p>
+        <p>Total Barang: <strong>{{ r['total_barang'] }}</strong></p>
+        <a href="{{ url_for('ruangan.detail', ruangan_id=r['_id']) }}" class="btn-detail">
+            Detail Barang
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+/* Grid Layout */
+.ruangan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+/* Card Design */
+.ruangan-card {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.ruangan-card h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+.ruangan-card p {
+    margin: 6px 0;
+    font-size: 0.95em;
+}
+
+/* Button */
+.btn-detail {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Hover Effects */
+.ruangan-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+}
+
+.btn-detail:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+</style>
+{% endblock %}

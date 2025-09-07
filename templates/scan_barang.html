@@ -1,0 +1,80 @@
+{% block content %}
+<div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:20px;">
+
+    <!-- Card Container -->
+    <div style="max-width: 800px; margin:auto; background:white; border-radius:12px; 
+                box-shadow:0 6px 18px rgba(0,0,0,0.15); overflow:hidden;">
+
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #6a11cb, #2575fc); padding:20px; color:white;">
+            <h2 style="margin:0; font-size:22px;">📦 {{ barang['nama_barang'] }}</h2>
+            <p style="margin:5px 0 0; font-size:14px;">Kode Barang: <strong>{{ barang['kode_barang'] }}</strong></p>
+        </div>
+
+        <!-- Body -->
+        <div style="padding:20px;">
+
+            <!-- QR Code -->
+            <div style="text-align:center; margin-bottom:20px;">
+                <img src="{{ url_for('static', filename='qris/' + barang['kode_barang'] + '.png') }}" 
+                     width="140" style="border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                <p style="font-size:13px; color:#666; margin-top:8px;">QR Code Barang</p>
+            </div>
+
+            <!-- Tabel Informasi -->
+            <table style="width:100%; border-collapse: collapse; font-size:14px;">
+                <tbody>
+                    <tr style="background-color:#f9f9ff;">
+                        <td style="padding:10px; font-weight:bold; width:35%;">🔢 No</td>
+                        <td style="padding:10px;">{{ barang['no'] }}</td>
+                    </tr>
+                    <tr style="background-color:#eef2ff;">
+                        <td style="padding:10px; font-weight:bold;">🏷️ Merk/Model</td>
+                        <td style="padding:10px;">{{ barang['merk'] }}</td>
+                    </tr>
+                    <tr style="background-color:#f9f9ff;">
+                        <td style="padding:10px; font-weight:bold;">🔑 No. Seri</td>
+                        <td style="padding:10px;">{{ barang['no_seri'] }}</td>
+                    </tr>
+                    <tr style="background-color:#eef2ff;">
+                        <td style="padding:10px; font-weight:bold;">📏 Ukuran</td>
+                        <td style="padding:10px;">{{ barang['ukuran'] }}</td>
+                    </tr>
+                    <tr style="background-color:#f9f9ff;">
+                        <td style="padding:10px; font-weight:bold;">🪵 Bahan</td>
+                        <td style="padding:10px;">{{ barang['bahan'] }}</td>
+                    </tr>
+                    <tr style="background-color:#eef2ff;">
+                        <td style="padding:10px; font-weight:bold;">📅 Tahun</td>
+                        <td style="padding:10px;">{{ barang['tahun'] }}</td>
+                    </tr>
+                    <tr style="background-color:#f9f9ff;">
+                        <td style="padding:10px; font-weight:bold;">⚙️ Kondisi</td>
+                        <td style="padding:10px;">{{ barang['kondisi'] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Tombol Kembali -->
+            <div style="margin-top:25px; text-align:right;">
+                <a href="javascript:history.back()" 
+                   style="text-decoration:none; color:white; background:#007bff; padding:10px 18px; 
+                          border-radius:8px; font-weight:600; font-size:14px; 
+                          box-shadow:0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s;">
+                    ⬅ Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+a:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+table td {
+    vertical-align: middle;
+}
+</style>
+{% endblock %}

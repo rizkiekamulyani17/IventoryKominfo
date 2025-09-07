@@ -1,0 +1,55 @@
+{% block content %}
+<div style="font-family: Arial, sans-serif; margin:20px;">
+    <h2 style="margin-bottom: 5px; color:#333;">Ruangan: {{ ruangan['nama_ruangan'] }}</h2>
+    <p style="margin-bottom:5px; color:#555; font-weight:500;">
+        Kode Ruangan: <strong>{{ ruangan['kode_ruangan'] }}</strong>
+    </p>
+    <p>Kode Lokasi: <strong>{{ ruangan['kode_lokasi'] }}</strong></p>
+
+    <!-- 🔢 Total Barang -->
+    <p style="margin-bottom:15px; color:#000; font-weight:600; font-size:15px;">
+        Total Barang: <span style="color:#2575fc;">{{ barang_list|length }}</span>
+    </p>
+
+    <!-- Tabel Barang -->
+    <table style="width:100%; border-collapse: collapse; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-size:14px;">
+        <thead>
+            <tr style="background: linear-gradient(135deg, #6a11cb, #2575fc); color:white; font-weight:bold;">
+                <th style="padding:10px; text-align:center;">No</th>
+                <th style="padding:10px; text-align:center;">Kode Barang</th>
+                <th style="padding:10px; text-align:center;">Nama Barang</th>
+                <th style="padding:10px; text-align:center;">Merk</th>
+                <th style="padding:10px; text-align:center;">No Seri</th>
+                <th style="padding:10px; text-align:center;">Ukuran</th>
+                <th style="padding:10px; text-align:center;">Bahan</th>
+                <th style="padding:10px; text-align:center;">Tahun</th>
+                <th style="padding:10px; text-align:center;">Kondisi</th>
+                <th style="padding:10px; text-align:center;">Harga Beli</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in barang_list %}
+            <tr style="text-align:center; border-bottom:1px solid #ddd; transition: background 0.3s;">
+                <td style="padding:8px;">{{ loop.index }}</td>
+                <td style="padding:8px;">{{ b['kode_barang'] }}</td>
+                <td style="padding:8px;">{{ b['nama_barang'] }}</td>
+                <td style="padding:8px;">{{ b['merk'] }}</td>
+                <td style="padding:8px;">{{ b['no_seri'] }}</td>
+                <td style="padding:8px;">{{ b['ukuran'] }}</td>
+                <td style="padding:8px;">{{ b['bahan'] }}</td>
+                <td style="padding:8px;">{{ b['tahun'] }}</td>
+                <td style="padding:8px;">{{ b['kondisi'] }}</td>
+                <td style="padding:8px;">Rp {{ "{:,.0f}".format(b['harga_beli']) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+tbody tr:nth-child(odd) { background-color: #f2f2f7; }
+tbody tr:nth-child(even) { background-color: #e6e6fa; }
+tbody tr:hover { background-color: rgba(106,17,203,0.1); }
+thead th { text-transform: uppercase; letter-spacing: 0.5px; }
+</style>
+{% endblock %}

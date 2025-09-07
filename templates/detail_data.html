@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Detail Data Barang</h2>
+    <p><strong>Kode Barang Manual:</strong> {{ kode }}</p>
+
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>No</th>
+                <th>Kode Barang</th>
+                <th>Nama Barang</th>
+                <th>Merk</th>
+                <th>No Seri</th>
+                <th>Ukuran</th>
+                <th>Bahan</th>
+                <th>Tahun</th>
+                <th>Kondisi</th>
+                <th>Harga Beli</th>
+                <th>Ruangan</th>
+                <th>QRIS</th>
+                <th>Keterangan</th>   <!-- ✅ Tambah kolom -->
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for barang in items %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ barang.kode_barang }}</td>
+                <td>{{ barang.nama_barang }}</td>
+                <td>{{ barang.merk }}</td>
+                <td>{{ barang.no_seri }}</td>
+                <td>{{ barang.ukuran }}</td>
+                <td>{{ barang.bahan }}</td>
+                <td>{{ barang.tahun }}</td>
+                <td>{{ barang.kondisi }}</td>
+                <td>Rp {{ "{:,.0f}".format(barang.harga_beli // barang.jumlah if barang.jumlah else barang.harga_beli) }}</td>
+                <td>{{ barang.nama_ruangan }}</td>
+                <td>
+                    {% if barang.qris_path %}
+                        <img src="/{{ barang.qris_path }}" 
+                             alt="QRIS" style="width:80px; height:80px; object-fit:contain;">
+                    {% else %}
+                        <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td>{{ barang.keterangan or '-' }}</td>   <!-- ✅ Tampilkan keterangan -->
+                <td>
+                    <a href="{{ url_for('barang.edit', barang_id=barang._id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{{ url_for('barang.hapus', barang_id=barang._id) }}" 
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Yakin ingin menghapus barang ini?')">
+                       Hapus
+                    </a>
+                    <a href="{{ url_for('barang.download_qris', barang_id=barang._id) }}" 
+                       class="btn btn-sm btn-primary">
+                       Download QRIS
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('barang.index') }}" class="btn btn-secondary mt-3">Kembali</a>
+</div>
+{% endblock %}

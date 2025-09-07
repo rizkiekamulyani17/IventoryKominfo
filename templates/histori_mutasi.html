@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 style="text-align:center; margin-bottom:20px; color:#1e3c72;">Histori Mutasi Barang</h2>
+
+<div style="overflow-x:auto;">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Barang</th>
+                <th>Ruangan Asal</th>
+                <th>Ruangan Tujuan</th>
+                <th>Keterangan</th>
+                <th>Tanggal Mutasi</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in histori_list %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ h['nama_barang'] }}</td>
+                <td>{{ h['nama_ruangan_asal'] }}</td>
+                <td>{{ h['nama_ruangan_tujuan'] }}</td>
+                <td>{{ h.get('keterangan_luar', '') }}</td>
+                <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                <td>
+                    <form action="{{ url_for('histori_mutasi.hapus', id=h['id']) }}" method="post"
+                          onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

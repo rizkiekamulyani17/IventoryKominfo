@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="font-family: Arial, sans-serif; margin:20px;">
+    <h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">Mutasi Barang</h2>
+
+    <!-- Bar pencarian -->
+    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <input type="text" id="searchInput" placeholder="Cari Nama Barang / Ruangan / Keterangan..." 
+               style="flex:1 1 250px; padding:8px; margin-bottom:5px; border-radius:6px; border:1px solid #ccc; font-size:14px; min-width:150px;">
+    </div>
+
+    <!-- Tabel responsif -->
+    <div style="overflow-x:auto;">
+        <table id="mutasiTable" style="width:100%; border-collapse: collapse; min-width:700px;">
+            <thead>
+                <tr style="background:#2575fc; color:black;">
+                    <th style="padding:10px; border:1px solid #ddd;">No</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Nama Barang</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Kode Barang</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Ruangan Saat Ini</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Keterangan</th>
+                    <th style="padding:10px; border:1px solid #ddd;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in barang_list %}
+                <tr>
+                    <td style="padding:8px; border:1px solid #ddd; text-align:center;">{{ loop.index }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ b['nama_barang'] }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ b['kode_barang'] }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ b['nama_ruangan'] }}</td>
+                    <td style="padding:8px; border:1px solid #ddd;">{{ b.get('keterangan_luar', '') }}</td>
+                    <td style="padding:8px; border:1px solid #ddd; text-align:center;">
+                        <form method="POST" action="{{ url_for('mutasi.mutasi_barang', barang_id=b['_id']) }}" 
+                              style="display:flex; flex-wrap:wrap; justify-content:center; gap:5px; align-items:center;">
+                            
+                            <select name="ruangan_tujuan_id" class="ruanganSelect" required 
+                                    style="padding:6px; border-radius:4px; min-width:120px;">
+                                <option value="" disabled selected>-- Pilih Ruangan --</option>
+                                {% for r in ruangan_list %}
+                                <option value="{{ r['_id'] }}">{{ r['nama_ruangan'] }}</option>
+                                {% endfor %}
+                                <option value="luar_kantor">Luar Kantor</option>
+                            </select>
+
+                            <input type="text" name="keterangan_luar" class="keteranganLuar" 
+                                   placeholder="Keterangan (tujuan luar kantor)" style="display:none; padding:6px; border-radius:4px;">
+
+                            <button type="submit" style="padding:6px 12px; border:none; border-radius:6px; background:#2575fc; color:white; cursor:pointer;">
+                                Mutasi
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="margin-top:10px; text-align:center;">
+        <button id="prevBtn" style="padding:6px 12px; margin-right:5px; border:none; border-radius:6px; background:#2575fc; color:white; cursor:pointer;">Previous</button>
+        <button id="nextBtn" style="padding:6px 12px; border:none; border-radius:6px; background:#2575fc; color:white; cursor:pointer;">Next</button>
+    </div>
+</div>
+
+<style>
+    table tr:nth-child(even) { background:#f9f9f9; }
+    table tr:hover { background:#e6f0ff; }
+    button:hover { background:#1a5edb; }
+    button:disabled { background:#ccc; cursor:not-allowed; }
+
+    /* Mobile responsiveness */
+    @media (max-width:600px) {
+        input#searchInput { width:100%; margin-bottom:10px; }
+        table { font-size:12px; }
+        table th, table td { padding:6px; }
+        form select { min-width:100px; }
+        form button { padding:5px 8px; font-size:12px; }
+        form input.keteranganLuar { width:100%; margin-top:5px; }
+    }
+</style>
+
+<script>
+const searchInput = document.getElementById('searchInput');
+const table = document.getElementById('mutasiTable');
+const rows = Array.from(table.querySelectorAll('tbody tr'));
+const rowsPerPage = 10;
+let currentPage = 1;
+
+function renderTable() {
+    const filter = searchInput.value.toLowerCase();
+    const filteredRows = rows.filter(row => {
+        const namaBarang = row.cells[1].textContent.toLowerCase();
+        const kodeBarang = row.cells[2].textContent.toLowerCase();
+        const ruangan = row.cells[3].textContent.toLowerCase();
+        const keterangan = row.cells[4].textContent.toLowerCase();
+        return namaBarang.includes(filter) || kodeBarang.includes(filter) || ruangan.includes(filter) || keterangan.includes(filter);
+    });
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    rows.forEach(r => r.style.display = 'none');
+    filteredRows.slice(start, end).forEach(r => r.style.display = '');
+
+    document.getElementById('prevBtn').disabled = currentPage === 1;
+    document.getElementById('nextBtn').disabled = end >= filteredRows.length;
+}
+
+// Event pencarian
+searchInput.addEventListener('keyup', function() { 
+    currentPage = 1; 
+    renderTable(); 
+});
+
+// Pagination
+document.getElementById('prevBtn').addEventListener('click', function() { 
+    if(currentPage > 1){ currentPage--; renderTable(); } 
+});
+document.getElementById('nextBtn').addEventListener('click', function() { 
+    currentPage++; renderTable(); 
+});
+
+// Render pertama
+renderTable();
+
+// Show/hide keterangan luar kantor
+document.querySelectorAll('.ruanganSelect').forEach(select => {
+    select.addEventListener('change', function() {
+        const keteranganInput = this.parentElement.querySelector('.keteranganLuar');
+        if(this.value === 'luar_kantor') {
+            keteranganInput.style.display = 'inline-block';
+            keteranganInput.required = true;
+        } else {
+            keteranganInput.style.display = 'none';
+            keteranganInput.required = false;
+            keteranganInput.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}
