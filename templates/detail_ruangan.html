@@ -87,7 +87,11 @@
             {% if session.get('username') %}
             <td>
                 <a href="{{ url_for('barang.edit_kondisi', barang_id=b['_id']) }}" 
-                   class="btn btn-sm btn-warning">Edit Kondisi</a>
+   class="btn btn-sm btn-warning me-2">Edit Kondisi</a>
+
+<a href="{{ url_for('barang.edit', barang_id=b['_id']) }}" 
+   class="btn btn-sm btn-success">Edit</a>
+
             </td>
             {% endif %}
         </tr>

@@ -35,3 +35,7 @@ def hapus(id):
     else:
         flash("Data histori tidak ditemukan.", "warning")
     return redirect(url_for('histori_mutasi.index'))
+
+
+
+
