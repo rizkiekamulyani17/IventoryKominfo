@@ -7,18 +7,21 @@
 <p><strong>Kode Lokasi:</strong> {{ ruangan['kode_lokasi'] }}</p>    <!-- ✅ kalau mau tampilkan juga -->   
 
     <!-- QR Ruangan -->
-    <div class="mb-3">
-        <img src="{{ url_for('static', filename='qris/' + ruangan['kode_ruangan'] + '.png') }}" 
-             width="120" style="border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
-    </div>
+<div class="mb-3">
+    {% if ruangan.qris_path %}
+    <img src="{{ url_for('static', filename=ruangan.qris_path.replace('static/', '')) }}" 
+         width="120" style="border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+    {% else %}
+    <span class="text-muted">QRIS belum dibuat</span>
+    {% endif %}
+</div>
+
 
     <!-- Tombol Download QRIS Ruangan & Semua Barang -->
     {% if session.get('username') %}
     <div class="mb-4">
         <a href="{{ url_for('ruangan.download_qris_ruangan', ruangan_id=ruangan['_id']) }}" 
            class="btn btn-danger">Download QRIS Ruangan</a>
-        <a href="{{ url_for('ruangan.download_qris_pdf', ruangan_id=ruangan['_id']) }}" 
-           class="btn btn-success">Download Semua QRIS Barang</a>
            <a href="{{ url_for('ruangan.download_data_pdf', ruangan_id=ruangan['_id']) }}" 
    class="btn btn-primary">Download Data Barang (PDF)</a>
 
@@ -53,7 +56,6 @@
             <th>Kondisi</th>
             <th>Harga Beli</th>
             <th>Keterangan</th>
-            <th>QRIS</th>
             {% if session.get('username') %}
             <th>Aksi</th>
             {% endif %}
@@ -82,10 +84,6 @@
             <td>{{ b['kondisi'] }}</td>
             <td>Rp {{ "{:,.0f}".format(b['harga_beli']) }}</td>
             <td>{{ b.keterangan or '-' }}</td>
-            <td>
-                <img src="{{ url_for('static', filename='qris/' + b['kode_barang'] + '.png') }}" 
-                     width="60" style="border-radius:5px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-            </td>
             {% if session.get('username') %}
             <td>
                 <a href="{{ url_for('barang.edit_kondisi', barang_id=b['_id']) }}" 

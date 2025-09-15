@@ -25,7 +25,6 @@ def tambah_barang(data):
 
     for i in range(jumlah_input):
         kode_barang = generate_kode_barang(base_kode, i + 1)
-        qris_path = generate_qris(kode_barang)
 
         barang_doc = {
             "no": i + 1,
@@ -40,9 +39,8 @@ def tambah_barang(data):
             "kondisi": data['kondisi'],
             "harga_beli": harga_satuan,
             "ruangan_id": ruangan_id,
-            "qris_path": qris_path,
             "keterangan": data.get("keterangan", "").strip(),
-            "foto": data.get("foto")  # ✅ simpan path foto
+            "foto": data.get("foto")  # simpan path foto jika ada
         }
 
         barang_collection.insert_one(barang_doc)
@@ -66,11 +64,14 @@ def hapus_barang(barang_id):
 # def get_all_barang():
 #     return list(barang_collection.find().sort("tahun", 1))  
 #     # 1 = ascending (tahun paling lama dulu), -1 = descending
-
 def get_all_barang():
     result = list(barang_collection.find().sort("tahun", 1))
     barang_list = []
     for item in result:
+        # ❌ Skip barang yang sudah dimutasi ke luar kantor
+        if item.get("ruangan_id") is None and item.get("keterangan_luar"):
+            continue
+
         ruangan = None
         if item.get("ruangan_id"):
             ruangan = get_ruangan_by_id(item["ruangan_id"])
@@ -90,7 +91,7 @@ def get_all_barang():
             "harga_beli": item.get("harga_beli", 0),
             "keterangan": item.get("keterangan", "-"),
             "qris_path": item.get("qris_path", ""),
-            "foto": item.get("foto", ""),   # ✅ tambahkan foto
+            "foto": item.get("foto", ""),
             "nama_ruangan": ruangan["nama_ruangan"] if ruangan else "Tidak diketahui",
             "ruangan_id": str(item["ruangan_id"]) if item.get("ruangan_id") else None
         })

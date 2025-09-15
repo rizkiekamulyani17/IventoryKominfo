@@ -33,6 +33,12 @@
                 <td style="text-align:center; padding:10px;">{{ r['kode_ruangan'] }}</td>
                 <td style="text-align:center; padding:10px;">{{ r['kode_lokasi'] }}</td>
                 <td style="text-align:center; padding:10px;">
+                   <a href="{{ url_for('ruangan.edit', ruangan_id=r['_id']) }}" 
+   style="text-decoration:none; color:white; background:#ffc107; padding:5px 10px;
+          border-radius:5px; font-weight:600; margin-right:5px; display:inline-block; transition: all 0.3s;">
+    Edit
+</a>
+
                     <a href="{{ url_for('ruangan.detail', ruangan_id=r['_id']) }}" 
                        style="text-decoration:none; color:white; background:#007bff; padding:5px 10px;
                               border-radius:5px; font-weight:600; margin-right:5px; display:inline-block;

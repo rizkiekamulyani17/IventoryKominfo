@@ -21,21 +21,21 @@ def index():
     barang_list = get_all_barang()
     ruangan_list = get_semua_ruangan2()
 
-    # Tambahkan nama ruangan langsung ke barang_list
+    # Dictionary ruangan: kunci string
     ruangan_dict = {str(r['_id']): r['nama_ruangan'] for r in ruangan_list}
+
+    filtered_barang = []
     for b in barang_list:
-        if b.get('ruangan_id'):
-            b['nama_ruangan'] = ruangan_dict.get(b['ruangan_id'], 'Belum Ada')
-        else:
-            b['nama_ruangan'] = 'Belum Ada'
+        ruangan_id = b.get('ruangan_id')
+        keterangan_luar = b.get('keterangan_luar')
 
-    # Debug: cek isi data sebelum dikirim ke template
-    print("=== DEBUG BARANG LIST ===")
-    print(barang_list)
-    print("=== DEBUG RUANGAN LIST ===")
-    print(ruangan_list)
+        # Hanya tampilkan barang yang ada di ruangan normal (tidak dimutasi ke luar kantor)
+        if ruangan_id:  
+            b['nama_ruangan'] = ruangan_dict.get(str(ruangan_id), 'Belum Ada')
+            b['keterangan_luar'] = ''  # pastikan kosong
+            filtered_barang.append(b)
 
-    return render_template('mutasi.html', barang_list=barang_list, ruangan_list=ruangan_list)
+    return render_template('mutasi.html', barang_list=filtered_barang, ruangan_list=ruangan_list)
 
 # @mutasi_bp.route('/mutasi/<barang_id>', methods=['POST'])
 # @login_or_token_required
@@ -84,13 +84,9 @@ def mutasi_barang(barang_id):
             {"$set": {"ruangan_id": ObjectId(ruangan_tujuan_id), "keterangan_luar": None}}
         )
 
-    # Catat histori
+    # Catat histori mutasi (opsional)
+    from models.histori_mutasi_model import catat_mutasi
     catat_mutasi(barang_id, ruangan_asal_id, ruangan_tujuan_id, keterangan_luar)
 
     flash("Barang berhasil dimutasi")
     return redirect(url_for('mutasi.index'))
-@mutasi_bp.route('/hapus_mutasi/<id>', methods=['POST'])
-def hapus_mutasi(id):
-    # logika hapus histori berdasarkan id
-    flash("Data histori berhasil dihapus.", "success")
-    return redirect(url_for('barang.histori'))

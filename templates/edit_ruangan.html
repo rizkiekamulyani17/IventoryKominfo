@@ -1,43 +1,28 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="font-family: Arial, sans-serif; margin:20px; max-width:600px;">
-    <h2 style="color:#333; margin-bottom:20px;">Edit Ruangan: {{ ruangan['nama_ruangan'] }}</h2>
-
-    <form method="POST" style="background:#f9f9f9; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
-        <div style="margin-bottom:15px;">
-            <label for="nama_ruangan" style="display:block; font-weight:600; margin-bottom:5px;">Nama Ruangan:</label>
-            <input type="text" name="nama_ruangan" id="nama_ruangan" value="{{ ruangan['nama_ruangan'] }}" required 
-                   style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+<div style="margin:20px; font-family: Arial, sans-serif;">
+    <h2>Edit Ruangan</h2>
+    <form method="POST">
+        <div style="margin-bottom:10px;">
+            <label>Nama Ruangan</label><br>
+            <input type="text" name="nama_ruangan" value="{{ ruangan['nama_ruangan'] }}" required>
         </div>
-
-        <div style="margin-bottom:15px;">
-            <label for="kode_lokasi" style="display:block; font-weight:600; margin-bottom:5px;">Kode Ruangan:</label>
-            <input type="text" name="kode_lokasi" id="kode_lokasi" value="{{ ruangan['kode_ruangan'] }}" required
-                   style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+        <div style="margin-bottom:10px;">
+            <label>Kode Ruangan</label><br>
+            <input type="text" name="kode_ruangan" value="{{ ruangan['kode_ruangan'] }}" required>
         </div>
-
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button type="submit" 
-                    style="flex:1; background: linear-gradient(135deg, #6a11cb, #2575fc); color:white; 
-                           padding:10px 0; border:none; border-radius:6px; font-weight:600; cursor:pointer;
-                           box-shadow:0 4px 12px rgba(0,0,0,0.2); transition: all 0.3s;">
-                Simpan Perubahan
-            </button>
-            <a href="{{ url_for('ruangan.index') }}" 
-               style="flex:1; text-align:center; text-decoration:none; color:white; background:#dc3545; 
-                      padding:10px 0; border-radius:6px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2);
-                      transition: all 0.3s;">
-                Batal
-            </a>
+        <div style="margin-bottom:10px;">
+            <label>Kode Lokasi</label><br>
+            <input type="text" name="kode_lokasi" value="{{ ruangan['kode_lokasi'] }}" required>
         </div>
+        <div style="margin-bottom:10px;">
+            <input type="checkbox" name="regenerate_qris" id="regenerate_qris">
+            <label for="regenerate_qris">Generate ulang QRIS</label>
+        </div>
+        <button type="submit" style="padding:6px 12px; background:#28a745; color:white; border:none; border-radius:4px;">
+            Simpan Perubahan
+        </button>
     </form>
 </div>
-
-<style>
-button:hover, a:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-}
-</style>
 {% endblock %}

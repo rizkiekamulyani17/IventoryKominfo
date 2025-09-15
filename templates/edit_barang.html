@@ -2,7 +2,8 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Edit Barang</h2>
-    <form method="POST" enctype="multipart/form-data"> <!-- 🔹 wajib -->
+    <form method="POST" enctype="multipart/form-data">
+        <!-- Input standar tetap sama -->
         <div class="form-group mb-2">
             <label>Kode Barang</label>
             <input type="text" name="kode_barang" class="form-control" value="{{ barang['kode_barang'] }}" required>
@@ -73,15 +74,24 @@
             <textarea class="form-control" id="keterangan" name="keterangan">{{ barang.keterangan }}</textarea>
         </div>
 
-        <!-- 🔹 Tambah bagian Foto -->
+        <!-- Foto Barang + Kamera -->
         <div class="mb-3">
             <label class="form-label">Foto Barang</label><br>
             {% if barang.get("foto") %}
                 <img src="{{ url_for('static', filename=barang['foto'].replace('static/','')) }}" 
                      alt="Foto Barang" class="img-thumbnail mb-2" width="150">
             {% endif %}
-            <input type="file" name="foto" class="form-control" accept="image/*" capture="environment" onchange="previewImage(event)">
-            <img id="preview" src="" style="max-height: 150px; display:none;" class="img-thumbnail mt-2">
+            <input type="file" id="fotoFile" name="foto" class="form-control" accept="image/*">
+            <button type="button" class="btn btn-info mt-2" onclick="openCamera()">Ambil Kamera</button>
+
+            <div class="mt-2">
+                <video id="camera" autoplay playsinline style="display:none; width:100%;" class="img-thumbnail"></video>
+                <button type="button" id="captureBtn" class="btn btn-warning mt-2" style="display:none;" onclick="capturePhoto()">Capture</button>
+            </div>
+
+            <div class="mt-2">
+                <img id="preview" src="" alt="Preview Foto" style="max-height:200px; display:none;" class="img-thumbnail">
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
@@ -90,13 +100,63 @@
 </div>
 
 <script>
-function previewImage(event) {
-    const [file] = event.target.files;
-    if (file) {
-        const preview = document.getElementById('preview');
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
+document.addEventListener("DOMContentLoaded", function() {
+    let stream;
+
+    const fotoInput = document.getElementById('fotoFile');
+    const previewImg = document.getElementById('preview');
+    const video = document.getElementById('camera');
+    const captureBtn = document.getElementById('captureBtn');
+
+    // Preview file upload biasa
+    fotoInput.addEventListener('change', function(event) {
+        if(event.target.files.length > 0){
+            previewImg.src = URL.createObjectURL(event.target.files[0]);
+            previewImg.style.display = 'block';
+        }
+    });
+
+    // Fungsi buka kamera
+    window.openCamera = function() {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            alert("Kamera tidak didukung di perangkat ini. Silakan unggah foto.");
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(s => {
+                stream = s;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';
+            })
+            .catch(err => alert('Tidak bisa mengakses kamera: ' + err));
     }
-}
+
+    // Fungsi capture foto dari kamera
+    window.capturePhoto = function() {
+        if(!stream) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        canvas.toBlob(blob => {
+            const file = new File([blob], "foto_barang.png", { type: "image/png" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fotoInput.files = dataTransfer.files;
+
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.style.display = 'block';
+        }, 'image/png');
+
+        // Stop kamera
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.style.display = 'none';
+        captureBtn.style.display = 'none';
+    }
+});
 </script>
 {% endblock %}

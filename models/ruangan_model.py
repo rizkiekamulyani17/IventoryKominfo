@@ -2,19 +2,23 @@ from config import db
 import qrcode
 from flask import request
 import os
+import uuid  # <-- tambah uuid
 
 ruangan_collection = db['ruangan']
 
-
-
 def generate_qris(kode_ruangan):
+    # URL QRIS tetap bisa pakai kode_ruangan
     url = f"{request.host_url}scan/{kode_ruangan}"
     img = qrcode.make(url)
 
-    path = f"static/qris/{kode_ruangan}.png"
+    # Nama file QRIS pakai UUID supaya unik
+    file_uuid = str(uuid.uuid4())
+    path = f"static/qris/{file_uuid}.png"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     img.save(path)
-    return path
+    
+    return path  # path lengkap ke file QRIS
+
 
 
 def tambah_ruangan(nama_ruangan, kode_ruangan, kode_lokasi):
@@ -72,15 +76,22 @@ def get_ruangan_by_kode(kode_ruangan):
     return ruangan_collection.find_one({"kode_ruangan": kode_ruangan})
 
 
-def update_ruangan(ruangan_id, nama_baru, kode_ruangan_baru, kode_lokasi_baru):
+def update_ruangan(ruangan_id, nama_baru, kode_ruangan_baru, kode_lokasi_baru, regenerate_qris=False):
     from bson.objectid import ObjectId
+    update_data = {
+        "nama_ruangan": nama_baru,
+        "kode_ruangan": kode_ruangan_baru,
+        "kode_lokasi": kode_lokasi_baru
+    }
+
+    if regenerate_qris:
+        from models.ruangan_model import generate_qris  # pastikan generate_qris di-import
+        qris_path = generate_qris(kode_ruangan_baru)
+        update_data["qris_path"] = qris_path
+
     ruangan_collection.update_one(
         {"_id": ObjectId(ruangan_id)},
-        {"$set": {
-            "nama_ruangan": nama_baru,
-            "kode_ruangan": kode_ruangan_baru,
-            "kode_lokasi": kode_lokasi_baru
-        }}
+        {"$set": update_data}
     )
 
 

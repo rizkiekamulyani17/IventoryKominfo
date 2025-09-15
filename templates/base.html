@@ -31,26 +31,29 @@
             z-index: 1000;
         }
         .sidebar .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 15px;
-            margin-bottom: 25px;
-        }
-        .sidebar .logo-container img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .sidebar .logo-container h2 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* rata kiri */
+    
+    padding: 5px 10px;
+    margin-bottom: 25px;
+}
+
+.sidebar .logo-container img.sidebar-logo {
+    width: 130px;
+    height: auto;
+    object-fit: contain; /* biar gak kepotong */
+    border-radius: 6px;
+}
+
+.sidebar .logo-container h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
 
         /* Menu items */
         .sidebar a {
@@ -202,8 +205,7 @@
 
 <div class="sidebar">
     <div class="logo-container">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
-        <h2>InventoryApp</h2>
+        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo" class="sidebar-logo">
     </div>
 
     <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>

@@ -1,5 +1,5 @@
 # utils/auth.py
-from flask import request, session, abort
+from flask import request, session, abort,redirect, url_for
 from config import PUBLIC_TOKENS
 
 def login_or_token_required(func):
@@ -14,6 +14,6 @@ def login_or_token_required(func):
             return func(*args, **kwargs)
 
         # Kalau gak lolos
-        abort(403)
+        return redirect(url_for("auth.login"))
     wrapper.__name__ = func.__name__
     return wrapper

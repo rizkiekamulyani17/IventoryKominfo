@@ -21,8 +21,8 @@
                         {% endif %}
                     {% endwith %}
 
-                    <!-- ✅ hanya satu form -->
                     <form method="POST" enctype="multipart/form-data">
+                        <!-- Input standar (tidak diubah) -->
                         <div class="mb-3">
                             <label class="form-label">Nama Barang</label>
                             <input type="text" name="nama_barang" class="form-control" required>
@@ -56,7 +56,7 @@
                         <div class="mb-3">
                             <label class="form-label">No Kode Barang</label>
                             <input type="text" name="kode_barang_manual" class="form-control" placeholder="Contoh: 13.00" required>
-                            <small class="text-muted">Kode barang akan otomatis menjadi 13.01, 13.02, dst sesuai jumlah</small>
+                            <small class="text-muted">Kode barang otomatis bertambah sesuai jumlah</small>
                         </div>
 
                         <div class="mb-3">
@@ -89,17 +89,23 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Keterangan Setelah Keadaan Barang</label>
+                            <label class="form-label">Keterangan</label>
                             <textarea name="keterangan" class="form-control" rows="2"></textarea>
                         </div>
 
-                        <!-- ✅ input foto -->
+                        <!-- Foto Barang + Kamera / Upload -->
                         <div class="mb-3">
                             <label class="form-label">Foto Barang</label>
-                            <input type="file" name="foto" class="form-control" accept="image/*" capture="environment" onchange="previewImage(event)">
-                            <small class="text-muted">Bisa pilih dari file atau ambil langsung kamera.</small>
+                            <input type="file" id="fotoFile" name="foto" class="form-control" accept="image/*">
+                            <button type="button" class="btn btn-info mt-2" onclick="openCamera()">Ambil Kamera</button>
+
                             <div class="mt-2">
-                                <img id="preview" src="" alt="Preview Foto" style="max-height: 150px; display:none;" class="img-thumbnail">
+                                <video id="camera" autoplay playsinline style="display:none; width:100%;" class="img-thumbnail"></video>
+                                <button type="button" id="captureBtn" class="btn btn-warning mt-2" style="display:none;" onclick="capturePhoto()">Capture</button>
+                            </div>
+
+                            <div class="mt-2">
+                                <img id="preview" src="" alt="Preview Foto" style="max-height:200px; display:none;" class="img-thumbnail">
                             </div>
                         </div>
 
@@ -108,18 +114,70 @@
                             <a href="{{ url_for('barang.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Kembali</a>
                         </div>
                     </form>
-
-                    <script>
-                    function previewImage(event) {
-                        const img = document.getElementById('preview');
-                        img.src = URL.createObjectURL(event.target.files[0]);
-                        img.style.display = 'block';
-                    }
-                    </script>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let stream;
+
+    const fotoInput = document.getElementById('fotoFile');
+    const previewImg = document.getElementById('preview');
+    const video = document.getElementById('camera');
+    const captureBtn = document.getElementById('captureBtn');
+
+    // Preview upload file biasa
+    fotoInput.addEventListener('change', function(event) {
+        if(event.target.files.length > 0){
+            previewImg.src = URL.createObjectURL(event.target.files[0]);
+            previewImg.style.display = 'block';
+        }
+    });
+
+    // Buka kamera
+    window.openCamera = function() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("Kamera tidak didukung di perangkat ini. Silakan unggah foto.");
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(s => {
+                stream = s;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';
+            })
+            .catch(err => alert('Tidak bisa mengakses kamera: ' + err));
+    }
+
+    // Ambil foto dari kamera
+    window.capturePhoto = function() {
+        if(!stream) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+
+        canvas.toBlob(blob => {
+            const file = new File([blob], "foto_barang.png", { type: "image/png" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fotoInput.files = dataTransfer.files;
+
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.style.display = 'block';
+        }, 'image/png');
+
+        // Stop kamera
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.style.display = 'none';
+        captureBtn.style.display = 'none';
+    }
+});
+</script>
 {% endblock %}

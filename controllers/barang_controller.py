@@ -35,6 +35,7 @@ def all_barang():
             or q in (b.get('merk') or '').lower()
             or q in (b.get('nama_ruangan') or '').lower()
             or q in str(b.get('tahun') or '').lower()
+             or q in (b.get('kondisi') or '').lower() 
         ]
 
     return render_template('all_barang.html', barang=barang)
@@ -47,14 +48,14 @@ def hapus(barang_id):
     return redirect(url_for('barang.index'))
 
 
-@barang_bp.route('/detail/<barang_id>')
-def detail(barang_id):
-    barang = get_barang_by_id(barang_id)
-    return render_template('detail_barang.html', barang=barang)
-@barang_bp.route('/detail2/<barang_id>')
-def detail2(barang_id):
-    barang = get_barang_by_id(barang_id)
-    return render_template('detail_barang2.html', barang=barang)
+# @barang_bp.route('/detail/<barang_id>')
+# def detail(barang_id):
+#     barang = get_barang_by_id(barang_id)
+#     return render_template('detail_barang.html', barang=barang)
+# @barang_bp.route('/detail2/<barang_id>')
+# def detail2(barang_id):
+#     barang = get_barang_by_id(barang_id)
+#     return render_template('detail_barang2.html', barang=barang)
 
 @barang_bp.route('/edit_kondisi/<barang_id>', methods=['GET', 'POST'])
 @login_or_token_required

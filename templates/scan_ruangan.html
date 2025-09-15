@@ -26,10 +26,12 @@
                     <th style="padding:10px; text-align:center;">Tahun</th>
                     <th style="padding:10px; text-align:center;">Kondisi</th>
                     <th style="padding:10px; text-align:center;">Harga Beli</th>
+                    <th style="padding:10px; text-align:center;">Keterangan</th>
                 </tr>
             </thead>
             <tbody>
-                {% for b in barang_list %}
+                {% for b in barang_list|sort(attribute='tahun', reverse=False) %}
+
                 <tr style="text-align:center; border-bottom:1px solid #ddd; transition: background 0.3s;">
                     <td style="padding:8px;">{{ loop.index }}</td>
                     <td style="padding:8px;">
@@ -50,6 +52,7 @@
                     <td style="padding:8px;">{{ b['tahun'] }}</td>
                     <td style="padding:8px;">{{ b['kondisi'] }}</td>
                     <td style="padding:8px;">Rp {{ "{:,.0f}".format(b['harga_beli']) }}</td>
+                    <td style="padding:8px;">{{ b.keterangan or '-' }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
