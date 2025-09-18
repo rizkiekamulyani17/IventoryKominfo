@@ -3,47 +3,39 @@
 <div class="container mt-4">
     <h2>Edit Barang</h2>
     <form method="POST" enctype="multipart/form-data">
-        <!-- Input standar tetap sama -->
+        <!-- Input standar -->
         <div class="form-group mb-2">
             <label>Kode Barang</label>
             <input type="text" name="kode_barang" class="form-control" value="{{ barang['kode_barang'] }}" required>
         </div>
-
         <div class="form-group mb-2">
             <label>Nama Barang</label>
             <input type="text" name="nama_barang" class="form-control" value="{{ barang['nama_barang'] }}" required>
         </div>
-
         <div class="form-group mb-2">
             <label>Merk/Model</label>
             <input type="text" name="merk" class="form-control" value="{{ barang['merk'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>No. Seri Pabrik</label>
             <input type="text" name="no_seri" class="form-control" value="{{ barang['no_seri'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>Ukuran</label>
             <input type="text" name="ukuran" class="form-control" value="{{ barang['ukuran'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>Bahan</label>
             <input type="text" name="bahan" class="form-control" value="{{ barang['bahan'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>Tahun Pembelian</label>
             <input type="number" name="tahun" class="form-control" value="{{ barang['tahun'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>Jumlah</label>
             <input type="number" name="jumlah" class="form-control" value="{{ barang['jumlah'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>Kondisi</label>
             <select name="kondisi" class="form-control">
@@ -52,12 +44,10 @@
                 <option value="Rusak Berat" {% if barang['kondisi'] == 'Rusak Berat' %}selected{% endif %}>Rusak Berat</option>
             </select>
         </div>
-
         <div class="form-group mb-2">
             <label>Harga Beli</label>
             <input type="number" name="harga_beli" class="form-control" value="{{ barang['harga_beli'] }}">
         </div>
-
         <div class="form-group mb-2">
             <label>Ruangan</label>
             <select name="ruangan_id" class="form-control" required>
@@ -68,7 +58,6 @@
                 {% endfor %}
             </select>
         </div>
-
         <div class="form-group mb-2">
             <label for="keterangan">Keterangan</label>
             <textarea class="form-control" id="keterangan" name="keterangan">{{ barang.keterangan }}</textarea>
@@ -77,20 +66,23 @@
         <!-- Foto Barang + Kamera -->
         <div class="mb-3">
             <label class="form-label">Foto Barang</label><br>
-            {% if barang.get("foto") %}
-                <img src="{{ url_for('static', filename=barang['foto'].replace('static/','')) }}" 
-                     alt="Foto Barang" class="img-thumbnail mb-2" width="150">
-            {% endif %}
-            <input type="file" id="fotoFile" name="foto" class="form-control" accept="image/*">
+            <div id="previewContainer">
+                {% if barang.get("foto") %}
+                    {% for f in barang.foto %}
+                        <div class="foto-wrapper position-relative d-inline-block me-2 mb-2">
+                            <img src="{{ url_for('static', filename=f.replace('static/','')) }}" class="img-thumbnail" width="100">
+                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 remove-foto" data-foto="{{ f }}" style="border-radius:50%;">&times;</button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <input type="hidden" name="hapus_foto[]" id="hapusFotoInput">
+            <input type="file" id="fotoFile" name="foto[]" class="form-control" accept="image/*" multiple>
             <button type="button" class="btn btn-info mt-2" onclick="openCamera()">Ambil Kamera</button>
 
             <div class="mt-2">
                 <video id="camera" autoplay playsinline style="display:none; width:100%;" class="img-thumbnail"></video>
-                <button type="button" id="captureBtn" class="btn btn-warning mt-2" style="display:none;" onclick="capturePhoto()">Capture</button>
-            </div>
-
-            <div class="mt-2">
-                <img id="preview" src="" alt="Preview Foto" style="max-height:200px; display:none;" class="img-thumbnail">
+                <button type="button" id="captureBtn" class="btn btn-warning mt-2" style="display:none;">Capture</button>
             </div>
         </div>
 
@@ -102,27 +94,64 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let stream;
-
     const fotoInput = document.getElementById('fotoFile');
-    const previewImg = document.getElementById('preview');
+    const previewContainer = document.getElementById('previewContainer');
     const video = document.getElementById('camera');
     const captureBtn = document.getElementById('captureBtn');
+    const hapusFotoInput = document.getElementById('hapusFotoInput');
 
-    // Preview file upload biasa
-    fotoInput.addEventListener('change', function(event) {
-        if(event.target.files.length > 0){
-            previewImg.src = URL.createObjectURL(event.target.files[0]);
-            previewImg.style.display = 'block';
+    let dataTransfer = new DataTransfer(); // menampung semua file baru
+    let fotoHapus = []; // menampung path foto lama yang akan dihapus
+
+    // Hapus foto lama atau baru
+    previewContainer.addEventListener('click', function(e) {
+        if(e.target.classList.contains('remove-foto')){
+            const wrapper = e.target.closest('.foto-wrapper');
+            const fotoPath = e.target.getAttribute('data-foto');
+            if(fotoPath) {
+                fotoHapus.push(fotoPath);
+                hapusFotoInput.value = fotoHapus.join(',');
+            }
+            wrapper.remove();
         }
     });
 
-    // Fungsi buka kamera
+    // Upload file manual (banyak sekaligus)
+    fotoInput.addEventListener('change', function(event) {
+        for (let file of event.target.files) {
+            dataTransfer.items.add(file);
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('foto-wrapper','position-relative','d-inline-block','me-2','mb-2');
+
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxHeight = '100px';
+            img.classList.add('img-thumbnail');
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.classList.add('btn','btn-sm','btn-danger','position-absolute','top-0','end-0','remove-foto');
+            btn.innerHTML = '&times;';
+            btn.addEventListener('click', function() {
+                wrapper.remove();
+                dataTransfer.items.remove(dataTransfer.items.length - 1);
+                fotoInput.files = dataTransfer.files;
+            });
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(btn);
+            previewContainer.appendChild(wrapper);
+        }
+        fotoInput.files = dataTransfer.files;
+    });
+
+    // Buka kamera
     window.openCamera = function() {
         if (!navigator.mediaDevices?.getUserMedia) {
-            alert("Kamera tidak didukung di perangkat ini. Silakan unggah foto.");
+            alert("Kamera tidak didukung di perangkat ini.");
             return;
         }
-
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(s => {
                 stream = s;
@@ -133,9 +162,9 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(err => alert('Tidak bisa mengakses kamera: ' + err));
     }
 
-    // Fungsi capture foto dari kamera
-    window.capturePhoto = function() {
-        if(!stream) return;
+    // Capture foto dari kamera
+    captureBtn.addEventListener('click', function() {
+        if (!stream) return;
 
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -144,19 +173,37 @@ document.addEventListener("DOMContentLoaded", function() {
 
         canvas.toBlob(blob => {
             const file = new File([blob], "foto_barang.png", { type: "image/png" });
-            const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             fotoInput.files = dataTransfer.files;
 
-            previewImg.src = URL.createObjectURL(file);
-            previewImg.style.display = 'block';
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('foto-wrapper','position-relative','d-inline-block','me-2','mb-2');
+
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxHeight = '100px';
+            img.classList.add('img-thumbnail');
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.classList.add('btn','btn-sm','btn-danger','position-absolute','top-0','end-0','remove-foto');
+            btn.innerHTML = '&times;';
+            btn.addEventListener('click', function() {
+                wrapper.remove();
+                dataTransfer.items.remove(dataTransfer.items.length - 1);
+                fotoInput.files = dataTransfer.files;
+            });
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(btn);
+            previewContainer.appendChild(wrapper);
         }, 'image/png');
 
         // Stop kamera
         video.srcObject.getTracks().forEach(track => track.stop());
         video.style.display = 'none';
         captureBtn.style.display = 'none';
-    }
+    });
 });
 </script>
 {% endblock %}

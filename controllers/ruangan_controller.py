@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from models.ruangan_model import tambah_ruangan, get_semua_ruangan, hapus_ruangan, get_ruangan_by_id
+from models.ruangan_model import tambah_ruangan, get_semua_ruangan, hapus_ruangan, get_ruangan_by_id,update_penanggung_jawab
 from flask import send_file, abort
 import os
 import zipfile
@@ -28,11 +28,15 @@ def tambah():
         nama = request.form['nama_ruangan']
         kode_ruangan = request.form['kode_ruangan']
         kode_lokasi = request.form['kode_lokasi']
-        
-        tambah_ruangan(nama, kode_ruangan,kode_lokasi)
-        flash("Ruangan berhasil ditambahkan")
+        penanggung_jawab = request.form.get('penanggung_jawab')
+        nip_pj = request.form.get('nip_pj')
+
+        tambah_ruangan(nama, kode_ruangan, kode_lokasi, penanggung_jawab, nip_pj)
+        flash("Ruangan berhasil ditambahkan", "success")
         return redirect(url_for('ruangan.index'))
+
     return render_template('tambah_ruangan.html')
+
 
 @ruangan_bp.route('/hapus/<ruangan_id>')
 @login_or_token_required
@@ -52,13 +56,25 @@ def edit(ruangan_id):
         nama_baru = request.form['nama_ruangan']
         kode_ruangan_baru = request.form['kode_ruangan']
         kode_lokasi_baru = request.form['kode_lokasi']
+        penanggung_jawab_baru = request.form['penanggung_jawab']
+        nip_pj_baru = request.form['nip_pj']
         regenerate = request.form.get('regenerate_qris') == "on"  # checkbox
 
-        update_ruangan(ruangan_id, nama_baru, kode_ruangan_baru, kode_lokasi_baru, regenerate_qris=regenerate)
-        flash("Ruangan berhasil diperbarui")
+        update_ruangan(
+            ruangan_id, 
+            nama_baru, 
+            kode_ruangan_baru, 
+            kode_lokasi_baru, 
+            penanggung_jawab_baru, 
+            nip_pj_baru, 
+            regenerate_qris=regenerate
+        )
+
+        flash("Ruangan berhasil diperbarui", "success")
         return redirect(url_for('ruangan.index'))
     
     return render_template('edit_ruangan.html', ruangan=ruangan)
+
 
 @ruangan_bp.route('/detail/<ruangan_id>')
 def detail(ruangan_id):
@@ -428,14 +444,18 @@ def download_data_pdf(ruangan_id):
     from collections import defaultdict
     import tempfile, os
     from flask import send_file, current_app
+    from models.pengaturan_model import get_pengaturan
+    from datetime import datetime
 
+    # --- Data Ruangan ---
     ruangan = get_ruangan_by_id(ruangan_id)
     if not ruangan:
         abort(404)
 
+    pengaturan = get_pengaturan()  # ✅ ambil data pengguna & pengurus
     barang_list = get_barang_per_ruangan(ruangan_id)
 
-    # --- Grouping barang (kode tanpa .01 dst) ---
+    # --- Grouping Barang ---
     grouped = defaultdict(lambda: {
         "kode_barang": "",
         "nama_barang": "",
@@ -451,7 +471,6 @@ def download_data_pdf(ruangan_id):
         "harga_beli": 0,
         "keterangan": ""
     })
-
     kondisi_map = {"Baik": "B", "Kurang Baik": "KB", "Rusak Berat": "RB"}
 
     for b in barang_list:
@@ -467,7 +486,7 @@ def download_data_pdf(ruangan_id):
         grouped[key]["ukuran"] = b["ukuran"]
         grouped[key]["bahan"] = b["bahan"]
         grouped[key]["tahun"] = b["tahun"]
-        grouped[key]["harga_beli"] += b["harga_beli"]  # ✅ total harga langsung dijumlahkan
+        grouped[key]["harga_beli"] += b["harga_beli"]
         grouped[key]["keterangan"] = b["keterangan"]
         grouped[key]["jumlah"] += b["jumlah"]
 
@@ -519,17 +538,17 @@ def download_data_pdf(ruangan_id):
     pdf.set_line_width(0.1)
     pdf.add_page()
 
-    # --- Header Resmi ---
+    # --- Header Instansi ---
     logo_path = os.path.join(current_app.root_path, "static", "brebes.jpg")
     if os.path.exists(logo_path):
         pdf.image(logo_path, x=10, y=8, w=25)
 
-    pdf.set_font("Times", 'B', 14)   # ✅ Judul resmi bold
+    pdf.set_font("Times", 'B', 14)
     pdf.cell(0, 8, "PEMERINTAH KABUPATEN BREBES", ln=True, align="C")
     pdf.cell(0, 8, "KARTU INVENTARIS RUANGAN", ln=True, align="C")
     pdf.ln(5)
 
-    pdf.set_font("Times", '', 10)    # ✅ Identitas normal
+    pdf.set_font("Times", '', 10)
     pdf.cell(60, 6, "Provinsi", 0, 0); pdf.cell(0, 6, ": PROVINSI JAWA TENGAH", ln=True)
     pdf.cell(60, 6, "Kabupaten/Kota", 0, 0); pdf.cell(0, 6, ": PEMERINTAH KABUPATEN BREBES", ln=True)
     pdf.cell(60, 6, "Bidang", 0, 0); pdf.cell(0, 6, ": Bidang Komunikasi, Informasi dan Dokumentasi", ln=True)
@@ -540,20 +559,21 @@ def download_data_pdf(ruangan_id):
     pdf.cell(60, 6, "Kode Lokasi", 0, 0); pdf.cell(0, 6, f": {ruangan['kode_lokasi']}", ln=True)
     pdf.ln(5)
 
-    # --- Header tabel ---
+    # --- Header Tabel ---
     def add_table_header(pdf):
-        pdf.set_font("Times", "B", 8)   # ✅ Header tabel bold
+        pdf.set_font("Times", "B", 8)
         col_widths = [8, 37, 30, 25, 25, 20, 20, 15, 15, 30, 25, 30]
         headers = ["No", "Kode Barang", "Nama Barang", "Merk", "No Seri", "Ukuran",
                    "Bahan", "Tahun", "Jumlah", "Kondisi (B/KB/RB)", "Harga Total", "Keterangan"]
         for i, h in enumerate(headers):
             pdf.cell(col_widths[i], 10, h, border=1, align="C")
         pdf.ln()
-        pdf.set_font("Times", "", 8)  # ✅ Setelah header, kembali normal
+        pdf.set_font("Times", "", 8)
         return col_widths
 
     col_widths = add_table_header(pdf)
 
+    # --- Isi Tabel ---
     total_jumlah, total_harga = 0, 0
     for idx, g in enumerate(grouped_list, start=1):
         total_jumlah += g["jumlah"]
@@ -570,21 +590,101 @@ def download_data_pdf(ruangan_id):
             str(g["tahun"]),
             str(g["jumlah"]),
             "",
-            f"Rp {g['harga_beli']:,.0f}",  # ✅ harga total
+            f"Rp {g['harga_beli']:,.0f}",
             g["keterangan"]
         ]
         kondisi_vals = [g["kondisi_B"], g["kondisi_KB"], g["kondisi_RB"]]
         pdf.row(col_widths, row, kondisi_vals)
 
     # --- Total ---
-    pdf.set_font("Times", "", 8)   # ✅ total normal, tidak bold
-    pdf.cell(sum(col_widths[:8]), 10, "TOTAL", border=1, align="C")
+    pdf.set_font("Times", "", 8)
+    pdf.cell(sum(col_widths[:8]), 10, "Jumlah Harga", border=1, align="C")
     pdf.cell(col_widths[8], 10, str(total_jumlah), border=1, align="C")
     pdf.cell(col_widths[9], 10, "", border=1)
     pdf.cell(col_widths[10], 10, f"Rp {total_harga:,.0f}", border=1, align="C")
     pdf.cell(col_widths[11], 10, "", border=1)
-    pdf.ln()
+    pdf.ln(15)
 
+    # --- Brebes + tanggal otomatis ---
+    pdf.set_font("Times", "", 10)
+    bulan_id = {
+        "January": "Januari", "February": "Februari", "March": "Maret", "April": "April",
+        "May": "Mei", "June": "Juni", "July": "Juli", "August": "Agustus",
+        "September": "September", "October": "Oktober", "November": "November", "December": "Desember"
+    }
+    now = datetime.now()
+    bulan = bulan_id[now.strftime("%B")]
+    tanggal = f"{now.day} {bulan} {now.year}"
+
+    pdf.set_x(220)
+    pdf.cell(0, 6, f"Brebes, {tanggal}", 0, 1, "L")
+
+    pdf.ln(10)
+
+        # --- Cek posisi Y sebelum tanda tangan (butuh sekitar 50mm ruang) ---
+    if pdf.get_y() > (pdf.h - 60):   # pdf.h = tinggi halaman
+        pdf.add_page()
+
+
+    # --- Bagian Tanda Tangan ---
+    col_w = 90
+    pdf.cell(col_w, 6, "Pengguna Barang", 0, 0, "C")
+    pdf.cell(col_w, 6, "Pengurus Barang", 0, 0, "C")
+    pdf.cell(col_w, 6, "Penanggung Jawab", 0, 1, "C")
+
+    pdf.ln(20)
+
+
+    pdf.ln(20)
+
+    # Data nama & NIP
+    pengguna = pengaturan.get("nama_pengguna", "-")
+    pengurus = pengaturan.get("nama_pengurus", "-")
+    pj = ruangan.get("penanggung_jawab", "-")
+
+    nip_pengguna = pengaturan.get("nip_pengguna", "-")
+    nip_pengurus = pengaturan.get("nip_pengurus", "-")
+    nip_pj = ruangan.get("nip_pj", "-")
+
+    # Simpan posisi Y untuk garis
+    y_now = pdf.get_y()
+
+    # Cetak nama
+    pdf.cell(col_w, 6, pengguna, 0, 0, "C")
+    pdf.cell(col_w, 6, pengurus, 0, 0, "C")
+    pdf.cell(col_w, 6, pj, 0, 1, "C")
+
+        # Pastikan garis hitam pekat
+    pdf.set_draw_color(0, 0, 0)
+    pdf.set_line_width(0.2)  # default 0.2, makin besar makin tebal
+
+
+    # === Buat garis lurus tepat di bawah masing-masing nama ===
+    x_pengguna = 10
+    w_pengguna = pdf.get_string_width(pengguna) + 10
+    pdf.line(x_pengguna + (col_w - w_pengguna)/2, y_now + 6,
+             x_pengguna + (col_w - w_pengguna)/2 + w_pengguna, y_now + 6)
+
+    x_pengurus = 10 + col_w
+    w_pengurus = pdf.get_string_width(pengurus) + 10
+    pdf.line(x_pengurus + (col_w - w_pengurus)/2, y_now + 6,
+             x_pengurus + (col_w - w_pengurus)/2 + w_pengurus, y_now + 6)
+
+    x_pj = 10 + 2*col_w
+    w_pj = pdf.get_string_width(pj) + 10
+    pdf.line(x_pj + (col_w - w_pj)/2, y_now + 6,
+             x_pj + (col_w - w_pj)/2 + w_pj, y_now + 6)
+
+
+    pdf.ln(1)
+
+    # Cetak NIP
+    pdf.cell(col_w, 6, f"{nip_pengguna}", 0, 0, "C")
+    pdf.cell(col_w, 6, f"{nip_pengurus}", 0, 0, "C")
+    pdf.cell(col_w, 6, f"{nip_pj}", 0, 1, "C")
+
+
+    # --- Output ---
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
     pdf.output(tmp.name)
     filename = f"{ruangan['nama_ruangan'].replace(' ', '_')}_DataBarang.pdf"

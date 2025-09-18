@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="bi bi-archive"></i> Histori Ruangan Dihapus</h5>
+        </div>
+        <div class="card-body">
+            {% if histori %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Ruangan</th>
+                                <th>Kode Ruangan</th>
+                                <th>Kode Lokasi</th>
+                                <th>Penanggung Jawab</th>
+                                <th>NIP PJ</th>
+                                <th>Tanggal Dihapus</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in histori %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ h['nama_ruangan'] }}</td>
+                                <td>{{ h['kode_ruangan'] }}</td>
+                                <td>{{ h['kode_lokasi'] }}</td>
+                                <td>{{ h['penanggung_jawab'] or '-' }}</td>
+                                <td>{{ h['nip_pj'] or '-' }}</td>
+                                <td>{{ h['deleted_at'].strftime('%d-%m-%Y %H:%M:%S') if h['deleted_at'] else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('histori_ruangan.hapus_histori', histori_id=h['_id']) }}" 
+   class="btn btn-sm btn-danger" 
+   onclick="return confirm('Yakin mau hapus permanen histori ini?')">
+    <i class="bi bi-trash"></i> Hapus
+</a>
+
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">Belum ada ruangan yang dihapus.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

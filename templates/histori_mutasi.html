@@ -6,35 +6,55 @@
 <div style="overflow-x:auto;">
     <table class="table table-hover">
         <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Barang</th>
-                <th>Ruangan Asal</th>
-                <th>Ruangan Tujuan</th>
-                <th>Keterangan</th>
-                <th>Tanggal Mutasi</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for h in histori_list %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ h['nama_barang'] }}</td>
-                <td>{{ h['nama_ruangan_asal'] }}</td>
-                <td>{{ h['nama_ruangan_tujuan'] }}</td>
-                <td>{{ h.get('keterangan_luar', '') }}</td>
-                <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                <td>
-                    <form action="{{ url_for('histori_mutasi.hapus', id=h['id']) }}" method="post"
-                          onsubmit="return confirm('Yakin ingin menghapus data ini?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                    </form>
-                    
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <tr>
+        <th>No</th>
+        <th>Nama Barang</th>
+        <th>Merk</th>
+        <th>No Seri</th>
+        <th>Ukuran</th>
+        <th>Bahan</th>
+        <th>Tahun</th>
+        <th>Jumlah</th>
+        <th>Kondisi</th>
+        <th>Kode Barang</th>
+        <th>Harga Beli</th>
+        <th>Keterangan</th>
+        <th>Ruangan Asal</th>
+        <th>Ruangan Tujuan</th>
+        <th>Keterangan Mutasi</th>
+        <th>Tanggal Mutasi</th>
+        <th>Aksi</th>
+    </tr>
+</thead>
+<tbody>
+    {% for h in histori_list %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ h['nama_barang'] }}</td>
+        <td>{{ h['merk'] }}</td>
+        <td>{{ h['no_seri'] }}</td>
+        <td>{{ h['ukuran'] }}</td>
+        <td>{{ h['bahan'] }}</td>
+        <td>{{ h['tahun'] }}</td>
+        <td>{{ h['jumlah'] }}</td>
+        <td>{{ h['kondisi'] }}</td>
+        <td>{{ h['kode_barang'] }}</td>
+        <td>{{ h['harga_beli'] }}</td>
+        <td>{{ h['keterangan'] }}</td>
+        <td>{{ h['nama_ruangan_asal'] }}</td>
+        <td>{{ h['nama_ruangan_tujuan'] }}</td>
+        <td>{{ h.get('keterangan_luar', '') }}</td>
+        <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
+        <td>
+            <form action="{{ url_for('histori_mutasi.hapus', id=h['id']) }}" method="post"
+                  onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
     </table>
 </div>
 {% endblock %}

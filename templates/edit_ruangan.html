@@ -1,28 +1,62 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="margin:20px; font-family: Arial, sans-serif;">
-    <h2>Edit Ruangan</h2>
-    <form method="POST">
-        <div style="margin-bottom:10px;">
-            <label>Nama Ruangan</label><br>
-            <input type="text" name="nama_ruangan" value="{{ ruangan['nama_ruangan'] }}" required>
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Ruangan</h5>
         </div>
-        <div style="margin-bottom:10px;">
-            <label>Kode Ruangan</label><br>
-            <input type="text" name="kode_ruangan" value="{{ ruangan['kode_ruangan'] }}" required>
+        <div class="card-body">
+            <form method="POST">
+                <!-- Nama Ruangan -->
+                <div class="mb-3">
+                    <label class="form-label">Nama Ruangan</label>
+                    <input type="text" class="form-control" name="nama_ruangan" 
+                           value="{{ ruangan['nama_ruangan'] }}" required>
+                </div>
+
+                <!-- Kode Ruangan -->
+                <div class="mb-3">
+                    <label class="form-label">Kode Ruangan</label>
+                    <input type="text" class="form-control" name="kode_ruangan" 
+                           value="{{ ruangan['kode_ruangan'] }}" required>
+                </div>
+
+                <!-- Kode Lokasi -->
+                <div class="mb-3">
+                    <label class="form-label">Kode Lokasi</label>
+                    <input type="text" class="form-control" name="kode_lokasi" 
+                           value="{{ ruangan['kode_lokasi'] }}" required>
+                </div>
+
+                <!-- Penanggung Jawab -->
+                <div class="mb-3">
+                    <label class="form-label">Penanggung Jawab</label>
+                    <input type="text" class="form-control" name="penanggung_jawab" 
+                           value="{{ ruangan['penanggung_jawab'] or '' }}" required>
+                </div>
+
+                <!-- NIP Penanggung Jawab -->
+                <div class="mb-3">
+                    <label class="form-label">NIP Penanggung Jawab</label>
+                    <input type="text" class="form-control" name="nip_pj" 
+                           value="{{ ruangan['nip_pj'] or '' }}" required>
+                </div>
+
+                <!-- Regenerate QRIS -->
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input" name="regenerate_qris" id="regenerate_qris">
+                    <label class="form-check-label" for="regenerate_qris">Generate ulang QRIS</label>
+                </div>
+
+                <!-- Tombol Simpan -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
         </div>
-        <div style="margin-bottom:10px;">
-            <label>Kode Lokasi</label><br>
-            <input type="text" name="kode_lokasi" value="{{ ruangan['kode_lokasi'] }}" required>
-        </div>
-        <div style="margin-bottom:10px;">
-            <input type="checkbox" name="regenerate_qris" id="regenerate_qris">
-            <label for="regenerate_qris">Generate ulang QRIS</label>
-        </div>
-        <button type="submit" style="padding:6px 12px; background:#28a745; color:white; border:none; border-radius:4px;">
-            Simpan Perubahan
-        </button>
-    </form>
+    </div>
 </div>
 {% endblock %}

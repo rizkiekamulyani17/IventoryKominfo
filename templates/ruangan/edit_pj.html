@@ -1,0 +1,8 @@
+<h3>Atur Penanggung Jawab Ruangan: {{ ruangan.nama_ruangan }}</h3>
+<form method="post">
+  <label>Nama Penanggung Jawab</label>
+  <input type="text" name="nama_pj" value="{{ ruangan.penanggung_jawab or '' }}" required>
+  <label>NIP Penanggung Jawab</label>
+  <input type="text" name="nip_pj" value="{{ ruangan.nip_pj or '' }}" required>
+  <button type="submit">Simpan</button>
+</form>

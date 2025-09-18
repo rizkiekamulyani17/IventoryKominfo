@@ -205,14 +205,17 @@
 
 <div class="sidebar">
     <div class="logo-container">
-        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo" class="sidebar-logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="sidebar-logo">
     </div>
 
     <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
     <a href="{{ url_for('ruangan.index') }}" class="{% if 'ruangan' in request.endpoint %}active{% endif %}">🏢 Tambah Ruangan</a>
-    <a href="{{ url_for('barang.index') }}" class="{% if 'barang' in request.endpoint %}active{% endif %}">📦 Tambah Barang</a>
+    <a href="{{ url_for('barang.tambah') }}" class="{% if 'barang' in request.endpoint %}active{% endif %}">📦 Tambah Barang</a>
     <a href="{{ url_for('mutasi.index') }}" class="{% if 'mutasi' in request.endpoint %}active{% endif %}">🔄 Mutasi Barang</a>
     <a href="{{ url_for('histori_mutasi.index') }}" class="{% if 'histori_mutasi' in request.endpoint %}active{% endif %}">📜 Histori Mutasi</a>
+    <a href="{{ url_for('histori_ruangan.index') }}" class="{% if 'histori_ruangan' in request.endpoint %}active{% endif %}">📂 Histori Ruangan</a>
+    <a href="{{ url_for('pengaturan.pengaturan') }}" class="{% if 'pengaturan' in request.endpoint %}active{% endif %}">⚙️ Pengaturan TTD</a>
+
 </div>
 
 <div class="header">

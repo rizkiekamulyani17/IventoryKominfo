@@ -57,13 +57,21 @@
             <td>{{ loop.index }}</td>
             <td>
     {% if b.foto %}
-        <img src="{{ url_for('static', filename=b['foto'].replace('static/','')) }}"
-             alt="Foto {{ b['nama_barang'] }}" 
-             width="200" style="border:none; border-radius:0; box-shadow:none;">
+        {% if b.foto is string %}
+            <img src="{{ url_for('static', filename=b.foto.replace('static/','')) }}"
+                 alt="Foto {{ b.nama_barang }}" 
+                 width="200" style="border:none; border-radius:0; box-shadow:none;">
+        {% elif b.foto is iterable %}
+            {# tampilkan foto pertama dari list #}
+            <img src="{{ url_for('static', filename=b.foto[0].replace('static/','')) }}"
+                 alt="Foto {{ b.nama_barang }}" 
+                 width="200" style="border:none; border-radius:0; box-shadow:none;">
+        {% endif %}
     {% else %}
         <span class="text-muted">Tidak ada foto</span>
     {% endif %}
 </td>
+
 
             <td>{{ b['nama_barang'] }}</td>
             <td>{{ b['kode_barang'] }}</td>

@@ -12,7 +12,7 @@
     <img src="{{ url_for('static', filename=ruangan.qris_path.replace('static/', '')) }}" 
          width="120" style="border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
     {% else %}
-    <span class="text-muted">QRIS belum dibuat</span>
+    <span class="text-muted">QR Code belum dibuat</span>
     {% endif %}
 </div>
 
@@ -21,7 +21,7 @@
     {% if session.get('username') %}
     <div class="mb-4">
         <a href="{{ url_for('ruangan.download_qris_ruangan', ruangan_id=ruangan['_id']) }}" 
-           class="btn btn-danger">Download QRIS Ruangan</a>
+           class="btn btn-danger">Download QR Code Ruangan</a>
            <a href="{{ url_for('ruangan.download_data_pdf', ruangan_id=ruangan['_id']) }}" 
    class="btn btn-primary">Download Data Barang (PDF)</a>
 

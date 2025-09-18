@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Card Form -->
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0"><i class="bi bi-gear-fill"></i> Atur Pengguna & Pengurus Barang</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        <!-- Nama Pengguna -->
+        <div class="mb-3">
+          <label class="form-label">Nama Pengguna Barang</label>
+          <input type="text" class="form-control" name="nama_pengguna" 
+                 value="{{ data.nama_pengguna or '' }}" required>
+        </div>
+
+        <!-- NIP Pengguna -->
+        <div class="mb-3">
+          <label class="form-label">NIP Pengguna Barang</label>
+          <input type="text" class="form-control" name="nip_pengguna" 
+                 value="{{ data.nip_pengguna or '' }}" required>
+        </div>
+
+        <!-- Nama Pengurus -->
+        <div class="mb-3">
+          <label class="form-label">Nama Pengurus Barang</label>
+          <input type="text" class="form-control" name="nama_pengurus" 
+                 value="{{ data.nama_pengurus or '' }}" required>
+        </div>
+
+        <!-- NIP Pengurus -->
+        <div class="mb-3">
+          <label class="form-label">NIP Pengurus Barang</label>
+          <input type="text" class="form-control" name="nip_pengurus" 
+                 value="{{ data.nip_pengurus or '' }}" required>
+        </div>
+
+        <!-- Tombol Simpan -->
+        <div class="text-end">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

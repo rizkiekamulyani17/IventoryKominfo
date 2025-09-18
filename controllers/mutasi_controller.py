@@ -37,30 +37,6 @@ def index():
 
     return render_template('mutasi.html', barang_list=filtered_barang, ruangan_list=ruangan_list)
 
-# @mutasi_bp.route('/mutasi/<barang_id>', methods=['POST'])
-# @login_or_token_required
-# def mutasi_barang(barang_id):
-#     ruangan_tujuan_id = request.form['ruangan_tujuan_id']
-    
-#     update_data = {}
-#     if ruangan_tujuan_id == 'luar_kantor':
-#         keterangan = request.form.get('keterangan_luar', '').strip()
-#         if not keterangan:
-#             flash("Keterangan tujuan luar kantor harus diisi!", "danger")
-#             return redirect(url_for('mutasi.index'))
-#         update_data['ruangan_id'] = None
-#         update_data['keterangan_luar'] = keterangan
-#     else:
-#         update_data['ruangan_id'] = ObjectId(ruangan_tujuan_id)
-#         update_data['keterangan_luar'] = ""  # reset keterangan jika sebelumnya luar kantor
-
-#     barang_collection.update_one(
-#         {"_id": ObjectId(barang_id)},
-#         {"$set": update_data}
-#     )
-#     flash("Barang berhasil dimutasi")
-#     return redirect(url_for('mutasi.index'))
-
 from models.histori_mutasi_model import catat_mutasi
 
 @mutasi_bp.route('/mutasi/<barang_id>', methods=['POST'])

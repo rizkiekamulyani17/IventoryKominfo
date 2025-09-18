@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <h2 class="mb-3">📦 Semua Barang</h2>
 
-    <!-- ✅ Form Pencarian -->
+    <!-- Form Pencarian -->
     <form method="get" action="{{ url_for('barang.all_barang') }}" class="row mb-3">
         <div class="col-md-10">
             <input type="text" name="q" value="{{ request.args.get('q','') }}" 
@@ -33,6 +33,7 @@
                 <th>Kondisi</th>
                 <th>Harga Beli</th>
                 <th>Keterangan</th>
+                <th>File BAST</th>
                 {% if session.get('username') or request.args.get('token') in config.PUBLIC_TOKENS %}
                     <th>Aksi</th>
                 {% endif %}
@@ -44,36 +45,59 @@
                 <td>{{ loop.index }}</td>
                 <td>
                     {% if b.foto %}
-                        <img src="{{ url_for('static', filename=b['foto'].replace('static/','')) }}"
-                             alt="Foto {{ b['nama_barang'] }}" 
-                             width="200" style="border:none; border-radius:0; box-shadow:none;">
+                        {% if b.foto is string %}
+                            <img src="{{ url_for('static', filename=b.foto.replace('static/','')) }}"
+                                 alt="Foto {{ b.nama_barang }}" style="max-width:200px; max-height:200px;" 
+                                 class="img-thumbnail me-2 mb-2">
+                        {% elif b.foto is iterable %}
+                            <div class="d-flex flex-wrap">
+                                {% for f in b.foto %}
+                                    <img src="{{ url_for('static', filename=f.replace('static/','')) }}"
+                                         alt="Foto {{ b.nama_barang }}" style="max-width:200px; max-height:200px;" 
+                                         class="img-thumbnail me-2 mb-2">
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     {% else %}
                         <span class="text-muted">Tidak ada foto</span>
                     {% endif %}
                 </td>
-                <td>{{ b['nama_barang'] }}</td>
-                <td>{{ b['kode_barang'] }}</td>
-                <td>{{ b['merk'] }}</td>
-                <td>{{ b['no_seri'] }}</td>
-                <td>{{ b['ukuran'] }}</td>
-                <td>{{ b['bahan'] }}</td>
-                <td>{{ b['tahun'] }}</td>
-                <td>{{ b['nama_ruangan'] }}</td>
-                <td>{{ b['kondisi'] }}</td>
-                <td>{{ "%.2f"|format(b['harga_beli']|default(0)) }}</td>
+
+                <td>{{ b.nama_barang }}</td>
+                <td>{{ b.kode_barang }}</td>
+                <td>{{ b.merk }}</td>
+                <td>{{ b.no_seri }}</td>
+                <td>{{ b.ukuran }}</td>
+                <td>{{ b.bahan }}</td>
+                <td>{{ b.tahun }}</td>
+                <td>{{ b.nama_ruangan }}</td>
+                <td>{{ b.kondisi }}</td>
+                <td>{{ "%.2f"|format(b.harga_beli|default(0)) }}</td>
                 <td>{{ b.keterangan or '-' }}</td>
-                
+
+                <!-- File BAST -->
+                <td>
+                    {% if b.file_bast %}
+                        {% set filename = b.file_bast.split('/')[-1] %}
+                        <a href="{{ url_for('static', filename=b.file_bast.replace('static/','')) }}" target="_blank">
+                            {{ filename }}
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Tidak ada</span>
+                    {% endif %}
+                </td>
+
                 {% if session.get('username') or request.args.get('token') in config.PUBLIC_TOKENS %}
                 <td>
-                    <a href="{{ url_for('barang.edit', barang_id=b['_id']) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="{{ url_for('barang.hapus', barang_id=b['_id']) }}" class="btn btn-danger btn-sm"
+                    <a href="{{ url_for('barang.edit', barang_id=b._id) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{{ url_for('barang.hapus', barang_id=b._id) }}" class="btn btn-danger btn-sm"
                        onclick="return confirm('Yakin ingin menghapus barang ini?')">Hapus</a>
                 </td>
                 {% endif %}
             </tr>
             {% else %}
             <tr>
-                <td colspan="15" class="text-center text-muted">Tidak ada data ditemukan</td>
+                <td colspan="16" class="text-center text-muted">Tidak ada data ditemukan</td>
             </tr>
             {% endfor %}
         </tbody>

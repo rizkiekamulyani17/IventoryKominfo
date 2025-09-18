@@ -9,6 +9,10 @@ from models.ruangan_model import get_semua_ruangan
 from models.barang_model import get_all_barang
 from models.ruangan_model import get_ruangan_by_kode
 from models.barang_model import get_barang_by_kode, get_barang_per_ruangan
+from controllers.pengaturan_controller import pengaturan_bp
+from controllers.histori_ruangan_controller import histori_ruangan_bp
+
+
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -20,6 +24,8 @@ app.register_blueprint(barang_bp)
 app.register_blueprint(mutasi_bp)
 app.register_blueprint(akun_bp)
 app.register_blueprint(histori_mutasi_bp)
+app.register_blueprint(pengaturan_bp)
+app.register_blueprint(histori_ruangan_bp)
 @app.route('/')
 def dashboard():
     ruangan_list = get_semua_ruangan()

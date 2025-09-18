@@ -9,44 +9,44 @@ def generate_kode_barang(base_kode, urutan):
     # Misal base_kode = M.123, urutan=1 → M.123.01
     return f"{base_kode}.{str(urutan).zfill(2)}"
 
-def tambah_barang(data):
-    from bson.objectid import ObjectId 
+# def tambah_barang(data):
+#     from bson.objectid import ObjectId 
 
-    jumlah_input = int(data['jumlah'])
-    base_kode = data.get('kode_barang_manual')
-    if not base_kode:
-        raise ValueError("Kode barang manual harus diisi")
+#     jumlah_input = int(data['jumlah'])
+#     base_kode = data.get('kode_barang_manual')
+#     if not base_kode:
+#         raise ValueError("Kode barang manual harus diisi")
 
-    ruangan_id = ObjectId(data['ruangan_id'])
+#     ruangan_id = ObjectId(data['ruangan_id'])
 
-    inserted_items = []
-    harga_total = int(data.get('harga_beli', 0))
-    harga_satuan = harga_total // jumlah_input if jumlah_input > 0 else harga_total
+#     inserted_items = []
+#     harga_total = int(data.get('harga_beli', 0))
+#     harga_satuan = harga_total // jumlah_input if jumlah_input > 0 else harga_total
 
-    for i in range(jumlah_input):
-        kode_barang = generate_kode_barang(base_kode, i + 1)
+#     for i in range(jumlah_input):
+#         kode_barang = generate_kode_barang(base_kode, i + 1)
 
-        barang_doc = {
-            "no": i + 1,
-            "nama_barang": data['nama_barang'],
-            "merk": data.get('merk'),
-            "no_seri": data.get('no_seri'),
-            "ukuran": data.get('ukuran'),
-            "bahan": data.get('bahan'),
-            "tahun": data.get('tahun'),
-            "kode_barang": kode_barang,
-            "jumlah": 1,
-            "kondisi": data['kondisi'],
-            "harga_beli": harga_satuan,
-            "ruangan_id": ruangan_id,
-            "keterangan": data.get("keterangan", "").strip(),
-            "foto": data.get("foto")  # simpan path foto jika ada
-        }
+#         barang_doc = {
+#             "no": i + 1,
+#             "nama_barang": data['nama_barang'],
+#             "merk": data.get('merk'),
+#             "no_seri": data.get('no_seri'),
+#             "ukuran": data.get('ukuran'),
+#             "bahan": data.get('bahan'),
+#             "tahun": data.get('tahun'),
+#             "kode_barang": kode_barang,
+#             "jumlah": 1,
+#             "kondisi": data['kondisi'],
+#             "harga_beli": harga_satuan,
+#             "ruangan_id": ruangan_id,
+#             "keterangan": data.get("keterangan", "").strip(),
+#             "foto": data.get("foto")  # simpan path foto jika ada
+#         }
 
-        barang_collection.insert_one(barang_doc)
-        inserted_items.append(barang_doc)
+#         barang_collection.insert_one(barang_doc)
+#         inserted_items.append(barang_doc)
 
-    return inserted_items
+#     return inserted_items
 
 
 def get_barang_per_ruangan(ruangan_id):
@@ -68,13 +68,11 @@ def get_all_barang():
     result = list(barang_collection.find().sort("tahun", 1))
     barang_list = []
     for item in result:
-        # ❌ Skip barang yang sudah dimutasi ke luar kantor
+        # Skip barang yang sudah dimutasi ke luar kantor
         if item.get("ruangan_id") is None and item.get("keterangan_luar"):
             continue
 
-        ruangan = None
-        if item.get("ruangan_id"):
-            ruangan = get_ruangan_by_id(item["ruangan_id"])
+        ruangan = get_ruangan_by_id(item["ruangan_id"]) if item.get("ruangan_id") else None
 
         barang_list.append({
             "_id": str(item["_id"]),
@@ -92,10 +90,12 @@ def get_all_barang():
             "keterangan": item.get("keterangan", "-"),
             "qris_path": item.get("qris_path", ""),
             "foto": item.get("foto", ""),
+            "file_bast": item.get("file_bast", ""),  # <-- tambahkan di sini
             "nama_ruangan": ruangan["nama_ruangan"] if ruangan else "Tidak diketahui",
             "ruangan_id": str(item["ruangan_id"]) if item.get("ruangan_id") else None
         })
     return barang_list
+
 
 
 
@@ -252,3 +252,84 @@ def get_all_barang2():
     barang_list = sorted(barang_list, key=lambda x: x["tahun"])
     return barang_list
 
+
+
+
+# def tambah_barang(data):
+#     from bson.objectid import ObjectId 
+
+#     jumlah_input = int(data['jumlah'])
+#     base_kode = data.get('kode_barang_manual')
+#     if not base_kode:
+#         raise ValueError("Kode barang manual harus diisi")
+
+#     ruangan_id = ObjectId(data['ruangan_id'])
+
+#     inserted_items = []
+#     harga_total = int(data.get('harga_beli', 0))
+#     harga_satuan = harga_total // jumlah_input if jumlah_input > 0 else harga_total
+
+#     for i in range(jumlah_input):
+#         kode_barang = generate_kode_barang(base_kode, i + 1)
+
+#     barang_doc = {
+#         "no": i + 1,
+#         "nama_barang": data['nama_barang'],
+#         "merk": data.get('merk'),
+#         "no_seri": data.get('no_seri'),
+#         "ukuran": data.get('ukuran'),
+#         "bahan": data.get('bahan'),
+#         "tahun": data.get('tahun'),
+#         "kode_barang": kode_barang,
+#         "jumlah": 1,
+#         "kondisi": data['kondisi'],
+#         "harga_beli": harga_satuan,
+#         "ruangan_id": ruangan_id,
+#         "keterangan": data.get("keterangan", "").strip(),
+#         "foto": data.get("foto", [])  # simpan list foto
+#     }
+
+#     barang_collection.insert_one(barang_doc)
+#     inserted_items.append(barang_doc)
+
+#     return inserted_items
+
+def tambah_barang(data):
+    from bson.objectid import ObjectId 
+
+    jumlah_input = int(data['jumlah'])
+    base_kode = data.get('kode_barang_manual')
+    if not base_kode:
+        raise ValueError("Kode barang manual harus diisi")
+
+    ruangan_id = ObjectId(data['ruangan_id'])
+
+    inserted_items = []
+    harga_total = int(data.get('harga_beli', 0))
+    harga_satuan = harga_total // jumlah_input if jumlah_input > 0 else harga_total
+
+    for i in range(jumlah_input):
+        kode_barang = generate_kode_barang(base_kode, i + 1)
+
+        barang_doc = {
+            "no": i + 1,
+            "nama_barang": data['nama_barang'],
+            "merk": data.get('merk'),
+            "no_seri": data.get('no_seri'),
+            "ukuran": data.get('ukuran'),
+            "bahan": data.get('bahan'),
+            "tahun": data.get('tahun'),
+            "kode_barang": kode_barang,
+            "jumlah": 1,
+            "kondisi": data['kondisi'],
+            "harga_beli": harga_satuan,
+            "ruangan_id": ruangan_id,
+            "keterangan": data.get("keterangan", "").strip(),
+            "foto": data.get("foto", []),           # simpan list foto
+            "file_bast": data.get("file_bast")      # simpan file BAST jika ada
+        }
+
+        barang_collection.insert_one(barang_doc)
+        inserted_items.append(barang_doc)
+
+    return inserted_items
