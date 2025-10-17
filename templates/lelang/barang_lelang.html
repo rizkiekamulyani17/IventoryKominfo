@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Barang Lelang{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+
+  <!-- Page Header -->
+  <div class="page-header d-flex justify-content-between align-items-center mb-3">
+    <h1 class="page-title mb-0">
+      <i class="bi bi-box me-2"></i>
+      Barang Lelang
+    </h1>
+    <a href="{{ url_for('lelang_bp.barang_lelang') }}" class="add-btn btn btn-outline-primary">
+      <i class="bi bi-arrow-clockwise me-2"></i>
+      Refresh Data
+    </a>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs d-flex flex-wrap gap-2 mb-4">
+    <!-- Tombol Semua -->
+    <a
+      href="{{ url_for('lelang_bp.barang_lelang') }}"
+      class="filter-tab btn {% if not selected_kategori or selected_kategori == 'Semua' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+    >
+      Semua
+    </a>
+    {% for kategori in kategori_list %}
+    <a
+      href="{{ url_for('lelang_bp.barang_lelang', kategori=kategori) }}"
+      class="filter-tab btn {% if selected_kategori == kategori %}btn-primary{% else %}btn-outline-primary{% endif %}"
+    >
+      {{ kategori }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Items Grid -->
+  <div class="cards-grid row g-4">
+    {% for b in items %}
+    <div class="col-md-4 col-lg-3">
+      <div class="item-card card h-100 shadow-sm border-0 position-relative">
+
+        <!-- Item Image -->
+        {% if b.foto and b.foto|length > 0 %}
+          <img
+            src="{{ url_for('static', filename=b.foto[0].replace('static/', '')) }}"
+            alt="{{ b.nama_barang }}"
+            class="card-img-top"
+            style="object-fit: cover; height: 180px;"
+          />
+        {% elif b.gambar %}
+          <img
+            src="{{ url_for('static', filename='uploads/' ~ b.gambar) }}"
+            alt="{{ b.nama_barang }}"
+            class="card-img-top"
+            style="object-fit: cover; height: 180px;"
+          />
+        {% else %}
+          <div
+            class="d-flex justify-content-center align-items-center bg-light"
+            style="height: 180px;"
+          >
+            <i class="bi bi-image fs-1 text-muted"></i>
+          </div>
+        {% endif %}
+
+        {% if b.kategori %}
+        <div class="badge bg-secondary position-absolute top-0 end-0 m-2">
+          {{ b.kategori }}
+        </div>
+        {% endif %}
+
+        <!-- Item Body -->
+        <div class="card-body">
+          <h5 class="card-title fw-bold">{{ b.nama_barang }}</h5>
+          <div class="card-text text-primary fw-semibold mb-2">
+            Limit Awal:
+            {% if b.harga_beli %}
+              Rp {{ "{:,.0f}".format(b.harga_beli|int) }},-
+            {% else %}
+              Rp 0,-
+            {% endif %}
+          </div>
+          <!-- Harga Tawar -->
+  <div class="card-text text-success fw-semibold mb-1">
+    Harga Tawar: 
+    Rp {{ "{:,.0f}".format(b['harga_tawar']|float) if b.get('harga_tawar') else 0 }},-
+  </div>
+
+  <!-- Limit Akhir -->
+  <div class="card-text text-danger fw-semibold mb-2">
+    Limit Akhir: 
+    Rp {{ "{:,.0f}".format(b['limit_akhir']|float) if b.get('limit_akhir') else 0 }},-
+  </div>
+
+          <p class="text-muted small">
+            {{ b.deskripsi or "Tidak ada deskripsi barang." }}
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-footer bg-white border-top-0 d-flex gap-2">
+          <a href="{{ url_for('manajemen_surat_bp.manajemen_surat') }}" class="btn btn-outline-info flex-fill">
+            <i class="bi bi-file-text me-1"></i> Surat
+          </a>
+          <form
+            action="{{ url_for('lelang_bp.selesai_lelang', item_id=b._id) }}"
+            method="POST"
+            class="flex-fill"
+          >
+            <button type="submit" class="btn btn-success w-100">
+              <i class="bi bi-check-circle me-1"></i> Terlelang
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center mt-5">
+      <div class="empty-icon mb-3">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+      </div>
+      <p class="text-muted">Belum ada barang rusak berat yang siap dilelang.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

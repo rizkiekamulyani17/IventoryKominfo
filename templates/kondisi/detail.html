@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="padding:20px; font-family:'Inter', sans-serif;">
+    <h2 style="margin-bottom:20px; color:#1f2937; font-weight:700;">
+        📋 Daftar Barang Kondisi: {{ kondisi }}
+    </h2>
+    <hr style="margin-bottom:20px;">
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Kode Barang</th>
+                    <th scope="col">Nama Barang</th>
+                    <th scope="col">Merk</th>
+                    <th scope="col">Tahun</th>
+                    <th scope="col">Ruangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in barang %}
+                <tr>
+                    <td>{{ b.kode_barang }}</td>
+                    <td>{{ b.nama_barang }}</td>
+                    <td>{{ b.merk }}</td>
+                    <td>{{ b.tahun }}</td>
+                    <td>{{ b.ruangan }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+/* Tambahan biar tabel lebih clean */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+.table thead th {
+    font-weight:600;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+.table td {
+    font-size:14px;
+}
+@media (max-width: 768px) {
+    h2 {
+        font-size:18px;
+        text-align:center;
+    }
+    .table td, .table th {
+        font-size:12px;
+        white-space:nowrap;
+    }
+}
+</style>
+{% endblock %}

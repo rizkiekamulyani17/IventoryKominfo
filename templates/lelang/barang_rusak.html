@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-wrapper p-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">📦 Daftar Barang Rusak Berat</h4>
+    <span class="text-muted small">Data ini otomatis diambil dari inventaris</span>
+  </div>
+
+  <!-- Filter Dropdown -->
+  <div class="mb-3">
+    <label for="filterKategori" class="form-label fw-semibold">Filter Kategori:</label>
+    <select id="filterKategori" class="form-select form-select-sm w-auto d-inline-block ms-2">
+      <option value="Semua" {% if selected_kategori == None or selected_kategori == "Semua" %}selected{% endif %}>Semua</option>
+      <option value="Peralatan" {% if selected_kategori == "Peralatan" %}selected{% endif %}>Peralatan</option>
+      <option value="Bangunan" {% if selected_kategori == "Bangunan" %}selected{% endif %}>Bangunan</option>
+      <option value="Kendaraan" {% if selected_kategori == "Kendaraan" %}selected{% endif %}>Kendaraan</option>
+    </select>
+  </div>
+
+  <!-- Tabel Barang Rusak -->
+  <div class="table-responsive shadow-sm rounded-3">
+    <table class="table align-middle table-bordered text-center">
+      <thead class="table-light">
+        <tr>
+          <th>No</th>
+          <th>Foto</th>
+          <th>Nama Barang</th>
+          <th>Merk</th>
+          <th>Kategori</th>
+          <th>Kondisi</th>
+          <th>Tahun</th>
+          <th>Jumlah</th>
+          <th>Harga</th>
+          <th>Harga Tawar</th>
+          <th>Limit Akhir</th>
+          <th>Deskripsi</th>
+          <th>Atur Kategori</th>
+          <th>Status Lelang</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for barang in barang_list %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>
+            {% if barang.foto and barang.foto|length > 0 %}
+              <img src="{{ '/' ~ barang.foto[0] }}" alt="foto" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+            {% else %}
+              <img src="{{ url_for('static', filename='no-image.png') }}" alt="no-foto" class="img-thumbnail" style="width: 50px; height: 50px;">
+            {% endif %}
+          </td>
+          <td>{{ barang['nama_barang'] }}</td>
+          <td>{{ barang['merk'] or "-" }}</td>
+          <td>{{ barang['kategori'] or "-" }}</td>
+          <td><span class="badge bg-danger">{{ barang['kondisi'] }}</span></td>
+          <td>{{ barang['tahun'] or "-" }}</td>
+          <td>{{ barang['jumlah'] or 0 }}</td>
+
+          <!-- Harga -->
+          <td>{{ "{:,.0f}".format(barang['harga_beli']|float) if barang.get('harga_beli') else "-" }}</td>
+
+          <!-- Harga Tawar -->
+<td>
+  <form method="post" action="{{ url_for('lelang_bp.set_harga_tawar', item_id=barang['_id']) }}" class="d-flex gap-1 justify-content-center">
+    <input type="number" name="harga_tawar" class="form-control form-control-sm" 
+           style="width:70px;" 
+           value="{{ barang['harga_tawar']|int if barang.get('harga_tawar') else '' }}" placeholder="0">
+    <button type="submit" class="btn btn-sm btn-primary">✔</button>
+  </form>
+</td>
+
+<!-- Limit Akhir -->
+<td>
+  <form method="post" action="{{ url_for('lelang_bp.set_limit_akhir', item_id=barang['_id']) }}" class="d-flex gap-1 justify-content-center">
+    <input type="number" name="limit_akhir" class="form-control form-control-sm" 
+           style="width:70px;" 
+           value="{{ barang['limit_akhir']|int if barang.get('limit_akhir') else '' }}" placeholder="0">
+    <button type="submit" class="btn btn-sm btn-success">✔</button>
+  </form>
+</td>
+
+          <td>
+  <form method="post" action="{{ url_for('lelang_bp.set_deskripsi', item_id=barang['_id']) }}">
+    <textarea name="deskripsi" class="form-control form-control-sm" 
+              rows="4" style="min-width:150px;" placeholder="Masukkan deskripsi...">{{ barang.get('deskripsi', '') }}</textarea>
+    <button type="submit" class="btn btn-sm btn-primary mt-1">✔</button>
+  </form>
+</td>
+
+
+
+
+          <!-- Atur Kategori -->
+          <td>
+            <form method="post" action="{{ url_for('lelang_bp.set_kategori', item_id=barang['_id']) }}" class="d-flex justify-content-center gap-1">
+              <select name="kategori" class="form-select form-select-sm w-auto">
+                <option value="Peralatan" {% if barang['kategori'] == "Peralatan" %}selected{% endif %}>Peralatan</option>
+                <option value="Bangunan" {% if barang['kategori'] == "Bangunan" %}selected{% endif %}>Bangunan</option>
+                <option value="Kendaraan" {% if barang['kategori'] == "Kendaraan" %}selected{% endif %}>Kendaraan</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-primary">✔</button>
+            </form>
+          </td>
+
+          <!-- Status Lelang -->
+          <td>
+            <form method="post" action="{{ url_for('lelang_bp.set_status_lelang', item_id=barang['_id']) }}" class="d-flex justify-content-center gap-1">
+              <select name="status_lelang" class="form-select form-select-sm w-auto">
+                <option value="Belum" {% if barang['status_lelang'] == "Belum" %}selected{% endif %}>Belum</option>
+                <option value="On Going" {% if barang['status_lelang'] == "On Going" %}selected{% endif %}>On Going</option>
+                <option value="Selesai" {% if barang['status_lelang'] == "Selesai" %}selected{% endif %}>Selesai</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-success">✔</button>
+            </form>
+          </td>
+
+          <!-- Aksi Selesai -->
+          <td>
+            <form action="{{ url_for('lelang_bp.selesai_lelang', item_id=barang['_id']) }}" method="POST" onsubmit="return confirm('Pindahkan ke riwayat lelang?')" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-warning">🏁 Selesai</button>
+            </form>
+          </td>
+
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="14" class="text-muted">Tidak ada data barang rusak berat ditemukan</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.getElementById("filterKategori").addEventListener("change", function () {
+    let kategori = this.value;
+    if (kategori === "Semua") {
+      window.location.href = "/lelang/barang-rusak";
+    } else {
+      window.location.href = "/lelang/barang-rusak/" + kategori;
+    }
+  });
+</script>
+{% endblock %}

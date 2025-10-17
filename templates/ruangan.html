@@ -1,78 +1,143 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="font-family: Arial, sans-serif; margin:20px;">
-    <h2 style="color:#333; margin-bottom:20px;">Daftar Ruangan</h2>
+<div class="container py-4" style="font-family: 'Segoe UI', sans-serif;">
+    <!-- Judul -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <h2 class="fw-bold text-custom m-0">
+    <i class="bi bi-building"></i> Daftar Ruangan
+</h2>
 
-    <!-- Tombol Tambah Ruangan -->
-    <div style="margin-bottom:20px;">
-        <a href="{{ url_for('ruangan.tambah') }}" 
-           style="text-decoration:none; color:white; background: linear-gradient(135deg, #6a11cb, #2575fc);
-                  padding:8px 16px; border-radius:6px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.2);
-                  transition: all 0.3s;">
-            Tambah Ruangan
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('ruangan.tambah') }}" class="btn btn-gradient fw-semibold shadow-sm">
+                ➕ Tambah Ruangan
+            </a>
+            <input type="text" id="searchInput" placeholder="Cari ruangan..." 
+                   class="form-control shadow-sm" style="min-width:220px;">
+        </div>
     </div>
 
-    <!-- Tabel Daftar Ruangan -->
-    <table style="width:100%; border-collapse: collapse; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <thead>
-            <tr style="background: linear-gradient(135deg, #ff416c, #ff4b2b); color:black; font-weight:bold;">
-                <th style="padding:12px; text-align:center;">No</th>
-                <th style="padding:12px; text-align:left;">Nama Ruangan</th>
-                <th style="padding:12px; text-align:center;">Kode Ruangan</th>
-                <th style="padding:12px; text-align:center;">Kode Lokasi</th>
-                <th style="padding:12px; text-align:center;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for r in ruangan %}
-            <tr style="border-bottom:1px solid #ddd; transition: background 0.3s;">
-                <td style="text-align:center; padding:10px;">{{ loop.index }}</td>
-                <td style="padding:10px;">{{ r['nama_ruangan'] }}</td>
-                <td style="text-align:center; padding:10px;">{{ r['kode_ruangan'] }}</td>
-                <td style="text-align:center; padding:10px;">{{ r['kode_lokasi'] }}</td>
-                <td style="text-align:center; padding:10px;">
-                   <a href="{{ url_for('ruangan.edit', ruangan_id=r['_id']) }}" 
-   style="text-decoration:none; color:white; background:#ffc107; padding:5px 10px;
-          border-radius:5px; font-weight:600; margin-right:5px; display:inline-block; transition: all 0.3s;">
-    Edit
-</a>
-
-                    <a href="{{ url_for('ruangan.detail', ruangan_id=r['_id']) }}" 
-                       style="text-decoration:none; color:white; background:#007bff; padding:5px 10px;
-                              border-radius:5px; font-weight:600; margin-right:5px; display:inline-block;
-                              transition: all 0.3s;">Detail</a>
-                    
-                    <a href="{{ url_for('ruangan.hapus', ruangan_id=r['_id']) }}" 
-                       style="text-decoration:none; color:white; background:#dc3545; padding:5px 10px;
-                              border-radius:5px; font-weight:600; display:inline-block; transition: all 0.3s;">
-                        Hapus
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Table Wrapper -->
+    <div class="table-responsive shadow-sm rounded">
+        <table id="ruanganTable" class="table align-middle table-hover m-0">
+            <thead class="table-header">
+                <tr>
+                    <th class="text-center" onclick="sortTable(0)">No</th>
+                    <th onclick="sortTable(1)">Nama Ruangan</th>
+                    <th class="text-center" onclick="sortTable(2)">Kode Ruangan</th>
+                    <th class="text-center" onclick="sortTable(3)">Kode Lokasi</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in ruangan %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>{{ r['nama_ruangan'] }}</td>
+                    <td class="text-center">{{ r['kode_ruangan'] }}</td>
+                    <td class="text-center">{{ r['kode_lokasi'] }}</td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center gap-1 flex-wrap">
+                            <a href="{{ url_for('ruangan.detail', ruangan_id=r['_id']) }}" 
+                               class="btn btn-sm btn-info text-white shadow-sm" title="Detail">
+                               <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('ruangan.edit', ruangan_id=r['_id']) }}" 
+                               class="btn btn-sm btn-warning text-dark shadow-sm" title="Edit">
+                               <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{{ url_for('ruangan.hapus', ruangan_id=r['_id']) }}" 
+                               onclick="return confirm('Yakin ingin menghapus ruangan ini?');"
+                               class="btn btn-sm btn-danger shadow-sm" title="Hapus">
+                               <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Tidak ada data ditemukan</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <style>
-tbody tr:nth-child(odd) {
-    background-color: #f9f9f9;
+/* 🔥 Gradient button */
+.btn-gradient {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff !important;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s;
 }
-tbody tr:nth-child(even) {
-    background-color: #f2f2f7;
-}
-tbody tr:hover {
-    background-color: rgba(255,65,108,0.1);
-}
-a:hover {
+.btn-gradient:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
-thead th {
+
+/* 🎨 Table style */
+.table-header th {
+    background-color: #1e3c72;   /* biru solid */
+    color: #fff;                /* teks putih */
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    cursor: pointer;
+    padding: 12px;
+}
+.text-custom {
+    color: #1e3c72 !important;
+}
+
+.table tbody tr:nth-child(odd) { background-color: #f8f9fa; }
+.table tbody tr:hover { background-color: rgba(30,60,114,0.1); }
+
+/* Responsif di HP */
+@media (max-width: 576px) {
+    h2 { font-size: 1.25rem; }
+    .btn-gradient { font-size: 0.9rem; padding: 6px 12px; }
+    table th, table td { font-size: 0.85rem; padding: 8px; }
 }
 </style>
+
+
+<script>
+// 🔍 Filter pencarian
+document.getElementById("searchInput").addEventListener("keyup", function () {
+    let filter = this.value.toLowerCase();
+    let rows = document.querySelectorAll("#ruanganTable tbody tr");
+    rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+});
+
+// ↕ Sorting kolom
+function sortTable(n) {
+    let table = document.getElementById("ruanganTable");
+    let rows = Array.from(table.rows).slice(1);
+    let switching = true, dir = "asc", switchcount = 0;
+
+    while (switching) {
+        switching = false;
+        for (let i = 0; i < rows.length - 1; i++) {
+            let x = rows[i].cells[n].innerText.toLowerCase();
+            let y = rows[i + 1].cells[n].innerText.toLowerCase();
+            let shouldSwitch = (dir === "asc" ? x > y : x < y);
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+                break;
+            }
+        }
+        if (!switching && switchcount === 0 && dir === "asc") {
+            dir = "desc";
+            switching = true;
+        }
+    }
+}
+</script>
 {% endblock %}

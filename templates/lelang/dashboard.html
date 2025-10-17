@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="font-family: 'Inter', sans-serif;">
+    <h2 class="mb-4 fw-bold text-primary">
+        🏷️ Dashboard Lelang Barang Rusak Berat
+    </h2>
+    <hr>
+
+    <!-- Statistik ringkas -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="text-secondary">Total Barang</h5>
+                    <h3 class="fw-bold">{{ total_barang }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="text-secondary">Total Lelang Selesai</h5>
+                    <h3 class="fw-bold">{{ total_selesai }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="text-secondary">Kategori Barang</h5>
+                    {% if data_kategori %}
+                        <ul class="list-unstyled mt-2">
+                            {% for kategori, total in data_kategori.items() %}
+                                <li class="d-flex justify-content-between">
+                                    <span>{{ kategori }}</span>
+                                    <span class="fw-bold">{{ total }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">Belum ada kategori</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar Barang Rusak Berat -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h4 class="fw-bold mb-3">📦 Daftar Barang Kondisi Rusak Berat</h4>
+
+            {% if barang and barang|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>No</th>
+                            <th>Foto</th>
+                            <th>Nama Barang</th>
+                            <th>Merk</th>
+                            <th>Kategori</th>
+                            <th>Kondisi</th>
+                            <th>Tahun</th>
+                            <th>Jumlah</th>
+                            <th>Harga Beli</th>
+                            <th>Status Lelang</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in barang %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                {% if item.foto and item.foto|length > 0 %}
+                                    <img src="{{ '/' ~ item.foto[0] }}" alt="foto" class="img-thumbnail"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='no-image.png') }}" alt="no-foto"
+                                         class="img-thumbnail" style="width: 50px; height: 50px;">
+                                {% endif %}
+                            </td>
+                            <td>{{ item.nama_barang }}</td>
+                            <td>{{ item.merk or '-' }}</td>
+                            <td>{{ item.kategori or '-' }}</td>
+                            <td><span class="badge bg-danger">{{ item.kondisi }}</span></td>
+                            <td>{{ item.tahun or '-' }}</td>
+                            <td>{{ item.jumlah or 0 }}</td>
+                            <td>Rp {{ "{:,}".format(item.harga_beli) }}</td>
+                            <td>
+                                {% if item.status_lelang == "Selesai" %}
+                                    <span class="badge bg-success">Selesai</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Belum</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center text-muted mt-3">Tidak ada barang dengan kondisi Rusak Berat yang tersedia untuk lelang.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, send_file, abort
 from werkzeug.utils import safe_join
 
@@ -28,6 +29,17 @@ def all_barang():
     barang = get_all_barang()
     q = request.args.get("q", "").strip().lower()
 
+    # Debugging status lelang
+    for b in barang:
+        print(f"[DEBUG] {b.get('nama_barang')} -> {repr(b.get('status_lelang'))}")
+
+    # 🧹 Filter barang dengan status lelang "Selesai" atau "Sudah"
+    barang = [
+        b for b in barang 
+        if (b.get("status_lelang") or "").strip().lower() not in ["selesai", "sudah"]
+    ]
+
+    # 🔍 Pencarian
     if q:
         barang = [
             b for b in barang 
@@ -35,7 +47,7 @@ def all_barang():
             or q in (b.get('merk') or '').lower()
             or q in (b.get('nama_ruangan') or '').lower()
             or q in str(b.get('tahun') or '').lower()
-             or q in (b.get('kondisi') or '').lower() 
+            or q in (b.get('kondisi') or '').lower() 
         ]
 
     return render_template('all_barang.html', barang=barang)
@@ -151,6 +163,8 @@ def edit(barang_id):
         return redirect(url_for('barang.index'))
 
     ruangan_list = get_semua_ruangan()
+    UPLOAD_FOTO = "static/uploads/barang"
+    UPLOAD_BAST = "static/uploads/bast"
 
     if request.method == 'POST':
         data_baru = {
@@ -168,30 +182,59 @@ def edit(barang_id):
             "keterangan": request.form.get('keterangan', '').strip()
         }
 
-        # Ambil foto lama
+        # ===================== FOTO BARANG =====================
         foto_paths = barang.get("foto", [])
-
-        # Ambil foto yang dihapus dari form
         hapus_foto = request.form.get('hapus_foto[]', '')
         if hapus_foto:
             hapus_list = hapus_foto.split(',')
             foto_paths = [f for f in foto_paths if f not in hapus_list]
+            for f in hapus_list:
+                if os.path.exists(f):
+                    os.remove(f)
 
-        # Tambahkan foto baru
         foto_files = request.files.getlist("foto[]")
         for foto_file in foto_files:
             if foto_file and foto_file.filename:
                 filename = secure_filename(foto_file.filename)
-                save_path = os.path.join(UPLOAD_FOLDER, filename)
+                save_path = os.path.join(UPLOAD_FOTO, filename)
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 foto_file.save(save_path)
                 foto_paths.append(save_path.replace("\\", "/"))
 
         data_baru["foto"] = foto_paths
+        # ======================================================
+
+        # ===================== FILE BAST =====================
+        hapus_bast = request.form.get("hapus_bast") == "1"
+        file_bast = request.files.get("file_bast")
+        bast_path = barang.get("file_bast")
+
+        # Jika user hapus file lama
+        if hapus_bast and bast_path and os.path.exists(bast_path):
+            os.remove(bast_path)
+            bast_path = None
+
+        # Jika upload file baru
+        if file_bast and file_bast.filename:
+            filename = secure_filename(file_bast.filename)
+            save_path = os.path.join(UPLOAD_BAST, filename)
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            file_bast.save(save_path)
+            bast_path = save_path.replace("\\", "/")
+
+        # Simpan hasil akhir
+        if hapus_bast:
+            data_baru["file_bast"] = None
+        elif file_bast and file_bast.filename:
+            data_baru["file_bast"] = bast_path
+        else:
+            # Tetap pakai file lama jika tidak dihapus atau diubah
+            data_baru["file_bast"] = barang.get("file_bast")
+        # ======================================================
 
         update_barang(barang_id, data_baru)
-        flash("Data barang berhasil diperbarui", "success")
-        return redirect(url_for('barang.index'))
+        flash("Data barang berhasil diperbarui beserta file BAST-nya", "success")
+        return redirect(url_for('barang.all_barang'))
 
     return render_template('edit_barang.html', barang=barang, ruangan_list=ruangan_list)
 

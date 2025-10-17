@@ -45,3 +45,5 @@ def get_all_histori():
 # Hapus histori mutasi
 def hapus_histori(id):
     return histori_mutasi_collection.delete_one({"_id": ObjectId(id)})
+
+

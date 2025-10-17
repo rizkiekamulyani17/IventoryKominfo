@@ -1,123 +1,140 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Tambah Barang</h4>
-                </div>
-                <div class="card-body">
+<div class="container py-5">
+    <!-- Judul Halaman -->
+    <!-- Judul Halaman -->
+<h2 class="text-center mb-5 fw-bold" style="color:#1e3c72;">
+    <i class="bi bi-plus-circle"></i> Tambah Barang
+</h2>
 
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card border-0 shadow-lg rounded-4">
+                <!-- Header -->
+                <div class="card-header bg-gradient text-white text-center rounded-top-4">
+                    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Form Tambah Barang</h4>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Flash message -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, msg in messages %}
                                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                                     {{ msg }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
 
-                    <form method="POST" enctype="multipart/form-data">
-                        <!-- Input standar -->
-                        <div class="mb-3">
-                            <label class="form-label">Nama Barang</label>
-                            <input type="text" name="nama_barang" class="form-control" required>
+                    <!-- Form -->
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="row g-3">
+                            <!-- Nama Barang -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nama Barang</label>
+                                <input type="text" name="nama_barang" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Merek / Model</label>
+                                <input type="text" name="merk" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">No. Seri Pabrik</label>
+                                <input type="text" name="no_seri" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Ukuran</label>
+                                <input type="text" name="ukuran" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Bahan</label>
+                                <input type="text" name="bahan" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tahun Pembuatan / Pembelian</label>
+                                <input type="text" name="tahun" class="form-control">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">No Kode Barang</label>
+                                <input type="text" name="kode_barang_manual" class="form-control" placeholder="Contoh: 13.00" required>
+                                <small class="text-muted">Kode barang otomatis bertambah sesuai jumlah</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Jumlah Barang</label>
+                                <input type="number" name="jumlah" class="form-control" value="1" min="1" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Harga Beli / Perolehan</label>
+                                <input type="number" name="harga_beli" class="form-control" value="0" min="0">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Masuk ke Ruangan</label>
+                                <select name="ruangan_id" class="form-select" required>
+                                    <option value="">-- Pilih Ruangan --</option>
+                                    {% for r in ruangan_list %}
+                                        <option value="{{ r['_id'] }}">{{ r['nama_ruangan'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Kondisi Barang</label>
+                                <select name="kondisi" class="form-select" required>
+                                    <option value="Baik">Baik</option>
+                                    <option value="Kurang Baik">Kurang Baik</option>
+                                    <option value="Rusak Berat">Rusak Berat</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Keterangan</label>
+                                <textarea name="keterangan" class="form-control" rows="2"></textarea>
+                            </div>
+
+                            <!-- Foto Barang -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Foto Barang</label>
+                                <input type="file" id="fotoFile" name="foto[]" class="form-control" accept="image/*" multiple>
+                                <div class="d-flex gap-2 mt-2 flex-wrap" id="previewContainer"></div>
+
+                                <div class="mt-2 d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-primary" onclick="openCamera()"><i class="bi bi-camera"></i> Buka Kamera</button>
+                                    <button type="button" id="captureBtn" class="btn btn-warning d-none"><i class="bi bi-camera-fill"></i> Capture</button>
+                                </div>
+
+                                <video id="camera" autoplay playsinline class="img-thumbnail mt-3 w-100 d-none"></video>
+                            </div>
+
+                            <!-- File BAST -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">File Surat BAST</label>
+                                <input type="file" name="file_bast" class="form-control" accept=".pdf,.doc,.docx">
+                                {% if barang and barang.file_bast %}
+                                    <p class="mt-2">
+                                        <a href="{{ url_for('static', filename=barang.file_bast.replace('static/','')) }}" target="_blank" class="btn btn-link">
+                                            <i class="bi bi-file-earmark-text"></i> Lihat File BAST
+                                        </a>
+                                    </p>
+                                {% endif %}
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Merek / Model</label>
-                            <input type="text" name="merk" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">No. Seri Pabrik</label>
-                            <input type="text" name="no_seri" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Ukuran</label>
-                            <input type="text" name="ukuran" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Bahan</label>
-                            <input type="text" name="bahan" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Tahun Pembuatan / Pembelian</label>
-                            <input type="text" name="tahun" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">No Kode Barang</label>
-                            <input type="text" name="kode_barang_manual" class="form-control" placeholder="Contoh: 13.00" required>
-                            <small class="text-muted">Kode barang otomatis bertambah sesuai jumlah</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Jumlah Barang</label>
-                            <input type="number" name="jumlah" class="form-control" value="1" min="1" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Harga Beli / Perolehan</label>
-                            <input type="number" name="harga_beli" class="form-control" value="0" min="0">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Masuk ke Ruangan</label>
-                            <select name="ruangan_id" class="form-select" required>
-                                <option value="">-- Pilih Ruangan --</option>
-                                {% for r in ruangan_list %}
-                                    <option value="{{ r['_id'] }}">{{ r['nama_ruangan'] }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Kondisi Barang</label>
-                            <select name="kondisi" class="form-select" required>
-                                <option value="Baik">Baik</option>
-                                <option value="Kurang Baik">Kurang Baik</option>
-                                <option value="Rusak Berat">Rusak Berat</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Keterangan</label>
-                            <textarea name="keterangan" class="form-control" rows="2"></textarea>
-                        </div>
-
-                        <!-- Upload Foto Barang -->
-                        <div class="mb-3">
-                            <label class="form-label">Foto Barang</label>
-                            <input type="file" id="fotoFile" name="foto[]" class="form-control" accept="image/*" multiple>
-                            <button type="button" class="btn btn-info mt-2" onclick="openCamera()">Ambil Kamera</button>
-                            <div class="mt-2" id="previewContainer" class="d-flex flex-wrap"></div>
-                            <video id="camera" autoplay playsinline style="display:none; width:100%;" class="img-thumbnail mt-2"></video>
-                            <button type="button" id="captureBtn" class="btn btn-warning mt-2" style="display:none;">Capture</button>
-                        </div>
-
-                        <!-- Upload File BAST -->
-                        <div class="mb-3">
-                            <label class="form-label">File Surat BAST</label>
-                            <input type="file" name="file_bast" class="form-control" accept=".pdf,.doc,.docx">
-                            {% if barang and barang.file_bast %}
-                            <p class="mt-2">
-                                <a href="{{ url_for('static', filename=barang.file_bast.replace('static/','')) }}" target="_blank">
-                                    Lihat File BAST
-                                </a>
-                            </p>
-                            {% endif %}
-                        </div>
-
+                        <!-- Tombol -->
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> Tambah Barang</button>
+                            <button type="submit" class="btn btn-success btn-lg"><i class="bi bi-plus-circle"></i> Tambah Barang</button>
                             <a href="{{ url_for('barang.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Kembali</a>
                         </div>
                     </form>
@@ -127,6 +144,21 @@
     </div>
 </div>
 
+<!-- Custom Style -->
+<style>
+.bg-gradient {
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
+}
+#previewContainer img {
+    max-height: 120px;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+#previewContainer img:hover {
+    transform: scale(1.05);
+}
+</style>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let stream;
@@ -134,17 +166,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const previewContainer = document.getElementById('previewContainer');
     const video = document.getElementById('camera');
     const captureBtn = document.getElementById('captureBtn');
+    let dataTransfer = new DataTransfer();
 
-    let dataTransfer = new DataTransfer(); // menampung semua file
-
-    // Pilih file manual (multiple)
+    // Preview file manual
     fotoInput.addEventListener('change', function(event) {
         for (const file of event.target.files) {
             dataTransfer.items.add(file);
-
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
-            img.style.maxHeight = '150px';
             img.classList.add('img-thumbnail','me-2','mb-2');
             previewContainer.appendChild(img);
         }
@@ -153,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Buka kamera
     window.openCamera = function() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (!navigator.mediaDevices?.getUserMedia) {
             alert("Kamera tidak didukung di perangkat ini.");
             return;
         }
@@ -161,8 +190,8 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(s => {
                 stream = s;
                 video.srcObject = stream;
-                video.style.display = 'block';
-                captureBtn.style.display = 'inline-block';
+                video.classList.remove('d-none');
+                captureBtn.classList.remove('d-none');
             })
             .catch(err => alert('Tidak bisa mengakses kamera: ' + err));
     }
@@ -170,7 +199,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Capture dari kamera
     captureBtn.addEventListener('click', function() {
         if (!stream) return;
-
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -183,12 +211,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
-            img.style.maxHeight = '150px';
             img.classList.add('img-thumbnail','me-2','mb-2');
             previewContainer.appendChild(img);
         }, 'image/png');
     });
 });
 </script>
-
 {% endblock %}

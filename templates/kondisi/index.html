@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="padding:30px; font-family:'Inter', sans-serif;">
+    <h2 class="page-title">📊 Ringkasan Kondisi Barang</h2>
+    <hr class="divider">
+
+    <div class="cards-wrapper">
+        {% for item in summary %}
+        <a href="{{ url_for('kondisi.detail', kondisi=item._id) }}" class="dashboard-card">
+            <div class="card-content 
+                {% if item._id == 'Rusak Berat' %} rusak-berat 
+                {% elif item._id == 'Kurang Baik' %} rusak-ringan 
+                {% elif item._id == 'Baik' %} barang-baik 
+                {% else %} default-card {% endif %}">
+                <div class="icon">
+                    {% if item._id == 'Rusak Berat' %}
+                        <i class="bi bi-exclamation-triangle"></i>
+                    {% elif item._id == 'Kurang Baik' %}
+                        <i class="bi bi-exclamation-circle"></i>
+                    {% elif item._id == 'Baik' %}
+                        <i class="bi bi-check-circle"></i>
+                    {% else %}
+                        <i class="bi bi-box"></i>
+                    {% endif %}
+                </div>
+                <div class="text">
+                    <h3>{{ item._id }}</h3>
+                    <p>{{ item.jumlah }} barang</p>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+/* Heading */
+.page-title {
+    margin-bottom:20px;
+    color:#1f2937;
+    font-weight:700;
+    font-size:22px;
+}
+.divider {
+    margin-bottom:30px;
+    border-color:#e5e7eb;
+}
+
+/* Grid wrapper */
+.cards-wrapper {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
+/* Card */
+.dashboard-card {
+    text-decoration:none;
+    color:inherit;
+}
+.card-content {
+    display:flex;
+    align-items:center;
+    padding:20px 25px;
+    border-radius:12px;
+    color:white;
+    min-height:100px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-content:hover {
+    transform: translateY(-6px);
+    box-shadow:0 12px 28px rgba(0,0,0,0.15);
+}
+
+/* Icon */
+.card-content .icon {
+    font-size:34px;
+    margin-right:18px;
+}
+
+/* Text */
+.card-content .text h3 {
+    margin:0;
+    font-weight:600;
+    font-size:16px;
+}
+.card-content .text p {
+    margin:4px 0 0 0;
+    font-size:20px;
+    font-weight:700;
+}
+
+/* Warna kondisi */
+.rusak-berat { background:#dc3545; }
+.rusak-ringan { background:#ffc107; color:#212529; }
+.barang-baik { background:#28a745; }
+.default-card { background:#6c757d; }
+
+/* Responsive typography */
+@media (max-width: 576px) {
+    .page-title { font-size:18px; text-align:center; }
+    .card-content { padding:16px; }
+    .card-content .icon { font-size:28px; margin-right:12px; }
+    .card-content .text h3 { font-size:14px; }
+    .card-content .text p { font-size:16px; }
+}
+</style>
+{% endblock %}

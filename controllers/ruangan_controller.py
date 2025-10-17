@@ -628,11 +628,13 @@ def download_data_pdf(ruangan_id):
 
     # --- Bagian Tanda Tangan ---
     col_w = 90
+    # ✅ Pastikan masih cukup ruang di halaman (sekitar 60mm)
+    if pdf.get_y() > (pdf.h - 60):
+        pdf.add_page()
     pdf.cell(col_w, 6, "Pengguna Barang", 0, 0, "C")
     pdf.cell(col_w, 6, "Pengurus Barang", 0, 0, "C")
     pdf.cell(col_w, 6, "Penanggung Jawab", 0, 1, "C")
 
-    pdf.ln(20)
 
 
     pdf.ln(20)

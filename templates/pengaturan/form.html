@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container py-4" style="font-family:'Segoe UI', sans-serif;">
+
+  <!-- Judul Halaman -->
+  <div class="text-center mb-4">
+    <h2 class="fw-bold" style="color:#1e3c72;">
+      <i class="bi bi-people-fill me-2"></i> Manajemen Pengguna & Pengurus Barang
+    </h2>
+    <p class="text-muted mb-0">Atur data pengguna dan pengurus barang dengan mudah</p>
+  </div>
+
   <!-- Flash Messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm rounded-3" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endfor %}
@@ -15,48 +24,87 @@
   {% endwith %}
 
   <!-- Card Form -->
-  <div class="card shadow-sm border-0">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><i class="bi bi-gear-fill"></i> Atur Pengguna & Pengurus Barang</h5>
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-header bg-gradient text-white rounded-top-4" 
+         style="background: linear-gradient(90deg, #1e3c72, #2a5298);">
+      <h5 class="mb-0 fw-bold"><i class="bi bi-gear-fill"></i> Atur Pengguna & Pengurus Barang</h5>
     </div>
-    <div class="card-body">
-      <form method="post">
-        <!-- Nama Pengguna -->
-        <div class="mb-3">
-          <label class="form-label">Nama Pengguna Barang</label>
-          <input type="text" class="form-control" name="nama_pengguna" 
-                 value="{{ data.nama_pengguna or '' }}" required>
-        </div>
+    <div class="card-body p-4">
 
-        <!-- NIP Pengguna -->
-        <div class="mb-3">
-          <label class="form-label">NIP Pengguna Barang</label>
-          <input type="text" class="form-control" name="nip_pengguna" 
-                 value="{{ data.nip_pengguna or '' }}" required>
-        </div>
+      <form method="post" class="needs-validation" novalidate>
+        <!-- Grid 2 Kolom -->
+        <div class="row g-3">
+          <!-- Nama Pengguna -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Nama Pengguna Barang</label>
+            <input type="text" class="form-control shadow-sm" name="nama_pengguna" 
+                   value="{{ data.nama_pengguna or '' }}" required>
+          </div>
 
-        <!-- Nama Pengurus -->
-        <div class="mb-3">
-          <label class="form-label">Nama Pengurus Barang</label>
-          <input type="text" class="form-control" name="nama_pengurus" 
-                 value="{{ data.nama_pengurus or '' }}" required>
-        </div>
+          <!-- NIP Pengguna -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">NIP Pengguna Barang</label>
+            <input type="text" class="form-control shadow-sm" name="nip_pengguna" 
+                   value="{{ data.nip_pengguna or '' }}" required>
+          </div>
 
-        <!-- NIP Pengurus -->
-        <div class="mb-3">
-          <label class="form-label">NIP Pengurus Barang</label>
-          <input type="text" class="form-control" name="nip_pengurus" 
-                 value="{{ data.nip_pengurus or '' }}" required>
+          <!-- Nama Pengurus -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Nama Pengurus Barang</label>
+            <input type="text" class="form-control shadow-sm" name="nama_pengurus" 
+                   value="{{ data.nama_pengurus or '' }}" required>
+          </div>
+
+          <!-- NIP Pengurus -->
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">NIP Pengurus Barang</label>
+            <input type="text" class="form-control shadow-sm" name="nip_pengurus" 
+                   value="{{ data.nip_pengurus or '' }}" required>
+          </div>
         </div>
 
         <!-- Tombol Simpan -->
-        <div class="text-end">
-          <button type="submit" class="btn btn-success">
+        <div class="text-end mt-4">
+          <button type="submit" class="btn btn-success px-4 shadow-sm rounded-3">
             <i class="bi bi-save"></i> Simpan
           </button>
         </div>
       </form>
+
     </div>
   </div>
 </div>
+
+<style>
+/* Efek input */
+.form-control:focus {
+  border-color: #2a5298;
+  box-shadow: 0 0 0 0.2rem rgba(42,82,152,0.25);
+  transition: 0.2s ease-in-out;
+}
+
+/* Efek tombol */
+.btn-success {
+  background: linear-gradient(90deg, #28a745, #218838);
+  border: none;
+}
+.btn-success:hover {
+  background: linear-gradient(90deg, #218838, #19692c);
+  transform: scale(1.05);
+  transition: 0.2s;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem !important;
+  }
+  h2 {
+    font-size: 1.25rem;
+  }
+  h5 {
+    font-size: 1rem;
+  }
+}
+</style>
 {% endblock %}

@@ -1,283 +1,360 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventaris Barang Kominfo</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Inventaris Barang Kominfo</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-        }
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+    }
 
-        /* Sidebar */
-        .sidebar {
-            height: 100vh;
-            width: 220px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: linear-gradient(180deg, #1e3c72, #2a5298);
-            padding-top: 30px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
-        .sidebar .logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* rata kiri */
-    
-    padding: 5px 10px;
-    margin-bottom: 25px;
-}
+    /* Sidebar */
+    .sidebar {
+      height: 100vh;
+      width: 220px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: linear-gradient(180deg, #1e3c72, #2a5298);
+      padding-top: 30px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.25);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    .sidebar .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+    .sidebar .logo-container img.sidebar-logo {
+      width: 130px;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      border-radius: 10px;
+      margin: 6px 12px;
+      transition: all 0.3s ease;
+    }
+    .sidebar a:hover, .sidebar a.active {
+      background: rgba(255,255,255,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transform: translateX(6px);
+    }
 
-.sidebar .logo-container img.sidebar-logo {
-    width: 130px;
-    height: auto;
-    object-fit: contain; /* biar gak kepotong */
-    border-radius: 6px;
-}
+    /* Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 220px;
+      right: 0;
+      height: 60px;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      z-index: 999;
+      transition: all 0.3s ease;
+    }
+    .header .menu-toggle {
+      display: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #1e3c72;
+      transition: transform 0.2s;
+    }
+    .header .menu-toggle:hover {
+      transform: scale(1.1);
+    }
 
-.sidebar .logo-container h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-}
+    /* User menu */
+    .user-menu {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      font-weight: 600;
+      color: #343a40;
+    }
+    .user-menu span {
+      padding: 8px 14px;
+      border-radius: 6px;
+      background: #f8f9fa;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .user-menu span:hover {
+      background: #e9ecef;
+    }
+    .user-menu .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 45px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      min-width: 180px;
+      z-index: 100;
+    }
+    .user-menu .dropdown a {
+      display: block;
+      padding: 10px 15px;
+      color: #343a40;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .user-menu .dropdown a:hover {
+      background: #f1f1f1;
+    }
+    .user-menu:hover .dropdown {
+      display: block;
+    }
 
+    /* Content */
+    .content {
+      margin-left: 220px;
+      padding: 80px 30px 30px 30px;
+      transition: all 0.3s ease;
+    }
 
-        /* Menu items */
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            text-decoration: none;
-            color: white;
-            font-weight: 500;
-            border-radius: 10px;
-            margin: 5px 10px;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.05);
-        }
-        .sidebar a:hover, .sidebar a.active {
-            background: rgba(255,255,255,0.3);
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+    /* Flash messages */
+    .flash-messages li {
+      background-color: #e2e3e5;
+      color: #41464b;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 220px;
-            right: 0;
-            height: 60px;
-            background-color: #ffffff;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 0 30px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
+    /* Table style */
+    .table {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+    .table th {
+      background: linear-gradient(90deg, #1e3c72, #2a5298);
+      color: white;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .table td {
+      vertical-align: middle;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: #f9f9fc;
+    }
+    .table-hover tbody tr:hover {
+      background-color: rgba(30,60,114,0.08);
+    }
 
-        /* User menu */
-        .user-menu {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-            font-weight: 600;
-            color: #343a40;
-        }
-        .user-menu span {
-            padding: 8px 12px;
-            border-radius: 6px;
-            background: #f8f9fa;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .user-menu span:hover {
-            background: #e9ecef;
-        }
-        .user-menu .dropdown {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 45px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            min-width: 180px;
-            z-index: 100;
-        }
-        .user-menu .dropdown a {
-            display: block;
-            padding: 10px 15px;
-            color: #343a40;
-            text-decoration: none;
-            transition: background 0.2s;
-        }
-        .user-menu .dropdown a:hover {
-            background: #f1f1f1;
-        }
-        .user-menu:hover .dropdown {
-            display: block;
-        }
-
-        /* Content */
-        .content {
-            margin-left: 220px;
-            padding: 80px 30px 30px 30px;
-        }
-
-        /* Flash messages */
-        .flash-messages ul {
-            list-style: none;
-            padding: 0;
-        }
-        .flash-messages li {
-            background-color: #e2e3e5;
-            color: #41464b;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* Tabel style */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table th {
-            background-color: #1e3c72;
-            color: white;
-            padding: 10px;
-            text-align: left;
-        }
-        table td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        table tr:hover {
-            background-color: rgba(30,60,114,0.1);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 60px;
-                padding-top: 15px;
-            }
-            .sidebar .logo-container h2 {
-                display: none;
-            }
-            .sidebar a {
-                justify-content: center;
-                padding: 12px 0;
-            }
-            .content {
-                margin-left: 60px;
-                padding: 80px 20px 20px 20px;
-            }
-            .header {
-                left: 60px;
-                padding: 0 20px;
-            }
-        }
-    </style>
+    /* Responsive */
+    @media (max-width: 992px) {
+      .header .menu-toggle {
+        display: block;
+      }
+      .sidebar {
+        left: -220px;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .header {
+        left: 0;
+      }
+      .content {
+        margin-left: 0;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="logo-container">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="sidebar-logo">
-    </div>
+<div class="sidebar" id="sidebar">
+  <div class="logo-container">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="sidebar-logo">
+  </div>
 
-    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
-    <a href="{{ url_for('ruangan.index') }}" class="{% if 'ruangan' in request.endpoint %}active{% endif %}">🏢 Tambah Ruangan</a>
-    <a href="{{ url_for('barang.tambah') }}" class="{% if 'barang' in request.endpoint %}active{% endif %}">📦 Tambah Barang</a>
-    <a href="{{ url_for('mutasi.index') }}" class="{% if 'mutasi' in request.endpoint %}active{% endif %}">🔄 Mutasi Barang</a>
-    <a href="{{ url_for('histori_mutasi.index') }}" class="{% if 'histori_mutasi' in request.endpoint %}active{% endif %}">📜 Histori Mutasi</a>
-    <a href="{{ url_for('histori_ruangan.index') }}" class="{% if 'histori_ruangan' in request.endpoint %}active{% endif %}">📂 Histori Ruangan</a>
-    <a href="{{ url_for('pengaturan.pengaturan') }}" class="{% if 'pengaturan' in request.endpoint %}active{% endif %}">⚙️ Pengaturan TTD</a>
+  <!-- Dashboard -->
+  <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+  </a>
 
+  <hr class="text-white mx-3">
+
+  <!-- Menu Tambah -->
+  <a class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapseTambah" role="button" aria-expanded="false" aria-controls="collapseTambah">
+    <span><i class="bi bi-plus-square me-2"></i> Tambah</span>
+    <i class="bi bi-chevron-down"></i>
+  </a>
+  <div class="collapse ms-3" id="collapseTambah">
+    <a href="{{ url_for('ruangan.index') }}" class="d-block py-1 {% if 'ruangan' in request.endpoint %}active{% endif %}">
+      Tambah Ruangan
+    </a>
+    <a href="{{ url_for('barang.tambah') }}" class="d-block py-1 {% if 'barang' in request.endpoint %}active{% endif %}">
+      Tambah Barang
+    </a>
+  </div>
+
+  <!-- Mutasi Barang -->
+  <a href="{{ url_for('mutasi.index') }}" class="mt-2 {% if 'mutasi' in request.endpoint %}active{% endif %}">
+    <i class="bi bi-arrow-repeat me-2"></i> Mutasi Barang
+  </a>
+
+  <!-- Menu Histori -->
+  <a class="d-flex justify-content-between align-items-center mt-2" data-bs-toggle="collapse" href="#collapseHistori" role="button" aria-expanded="false" aria-controls="collapseHistori">
+    <span><i class="bi bi-journal-text me-2"></i> Riwayat</span>
+    <i class="bi bi-chevron-down"></i>
+  </a>
+  <div class="collapse ms-3" id="collapseHistori">
+    <a href="{{ url_for('histori_mutasi.index') }}" class="d-block py-1 {% if 'histori_mutasi' in request.endpoint %}active{% endif %}">
+      Riwayat Mutasi
+    </a>
+    <a href="{{ url_for('histori_ruangan.index') }}" class="d-block py-1 {% if 'histori_ruangan' in request.endpoint %}active{% endif %}">
+      Riwayat Ruangan
+    </a>
+    <a href="{{ url_for('lelang_bp.riwayat_lelang') }}" class="d-block py-1 {% if 'riwayat_lelang' in request.endpoint %}active{% endif %}">
+  Riwayat Lelang</a>
+  </div>
+
+
+<a class="d-flex justify-content-between align-items-center mt-2" 
+   data-bs-toggle="collapse" 
+   href="#collapseLelang" 
+   role="button" 
+   aria-expanded="false" 
+   aria-controls="collapseLelang">
+  <span><i class="bi bi-journal-text me-2"></i> Lelang</span>
+  <i class="bi bi-chevron-down"></i>
+</a>
+
+<div class="collapse ms-3" id="collapseLelang">
+  <a href="{{ url_for('manajemen_surat_bp.manajemen_surat') }}" 
+     class="d-block py-1 {% if 'manajemen_surat' in request.endpoint %}active{% endif %}">
+    Manajemen Surat
+  </a>
+
+  <a href="{{ url_for('lelang_bp.barang_rusak') }}" 
+     class="d-block py-1 {% if 'barang_rusak' in request.endpoint %}active{% endif %}">
+    Barang Rusak
+  </a>
+
+  <a href="{{ url_for('lelang_bp.barang_lelang') }}" 
+     class="d-block py-1 {% if 'barang_lelang' in request.endpoint %}active{% endif %}">
+    Barang Lelang
+  </a>
 </div>
 
-<div class="header">
+
+  <!-- Menu Pengaturan -->
+  <a class="d-flex justify-content-between align-items-center mt-2" data-bs-toggle="collapse" href="#collapsePengaturan" role="button" aria-expanded="false" aria-controls="collapsePengaturan">
+    <span><i class="bi bi-gear me-2"></i> Pengaturan</span>
+    <i class="bi bi-chevron-down"></i>
+  </a>
+  <div class="collapse ms-3" id="collapsePengaturan">
+    <a href="{{ url_for('pengaturan.pengaturan') }}" class="d-block py-1 {% if 'pengaturan' in request.endpoint %}active{% endif %}">
+      Pengaturan TTD
+    </a>
+  </div>
+</div>
+
+
+<div class="header d-flex align-items-center">
+  <span class="menu-toggle" onclick="toggleSidebar()">☰</span>
+
+  <div class="ms-auto"> <!-- ini mendorong ke kanan -->
     {% if session.get('username') %}
-        <div class="user-menu">
-            <span>👤 {{ session.get('username') }}</span>
-            <div class="dropdown">
-                <a href="{{ url_for('akun.ganti_password') }}">🔑 Ganti Password</a>
-                <a href="{{ url_for('auth.logout') }}">🚪 Logout</a>
-            </div>
-        </div>
+    <div class="user-menu">
+      <span>👤 {{ session.get('username') }}</span>
+      <div class="dropdown">
+        <a href="{{ url_for('akun.ganti_password') }}">🔑 Ganti Password</a>
+        <a href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+      </div>
+    </div>
     {% else %}
-        <a href="{{ url_for('auth.login') }}">Login</a>
+    <a href="{{ url_for('auth.login') }}">Login</a>
     {% endif %}
+  </div>
 </div>
+
 
 <div class="content">
-    <div class="flash-messages">
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul>
-              {% for msg in messages %}
-                <li>{{ msg }}</li>
-              {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
-    </div>
+  <div class="flash-messages">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for msg in messages %}
+            <li>{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+  </div>
 
-    {% block content %}
-    <h2 style="text-align:center; margin-bottom:20px; color:#1e3c72;">Histori Mutasi Barang</h2>
+  {% block content %}
+  <h2 class="text-center mb-4" style="color:#1e3c72;">Histori Mutasi Barang</h2>
 
-    <div style="overflow-x:auto;">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Barang</th>
-                    <th>Ruangan Asal</th>
-                    <th>Ruangan Tujuan</th>
-                    <th>Keterangan</th>
-                    <th>Tanggal Mutasi</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for h in histori_list %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ h['nama_barang'] }}</td>
-                    <td>{{ h['nama_ruangan_asal'] }}</td>
-                    <td>{{ h['nama_ruangan_tujuan'] }}</td>
-                    <td>{{ h.get('keterangan_luar', '') }}</td>
-                    <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endblock %}
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Barang</th>
+          <th>Ruangan Asal</th>
+          <th>Ruangan Tujuan</th>
+          <th>Keterangan</th>
+          <th>Tanggal Mutasi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in histori_list %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ h['nama_barang'] }}</td>
+          <td>{{ h['nama_ruangan_asal'] }}</td>
+          <td>{{ h['nama_ruangan_tujuan'] }}</td>
+          <td>{{ h.get('keterangan_luar', '') }}</td>
+          <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endblock %}
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("active");
+  }
+</script>
 </body>
 </html>

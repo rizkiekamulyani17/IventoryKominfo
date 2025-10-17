@@ -1,42 +1,38 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="font-family: Arial, sans-serif; margin:20px;">
-    <h2 style="text-align:center; color:#1e3c72; margin-bottom:20px;">Mutasi Barang</h2>
+<div class="mutasi-container">
+    <h2 class="title">📦 Mutasi Barang</h2>
 
     <!-- Bar pencarian -->
-    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <input type="text" id="searchInput" placeholder="Cari Nama Barang / Ruangan / Keterangan..." 
-               style="flex:1 1 250px; padding:8px; margin-bottom:5px; border-radius:6px; border:1px solid #ccc; font-size:14px; min-width:150px;">
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Cari Nama Barang / Ruangan / Keterangan...">
     </div>
 
     <!-- Tabel responsif -->
-    <div style="overflow-x:auto;">
-        <table id="mutasiTable" style="width:100%; border-collapse: collapse; min-width:700px;">
+    <div class="table-wrapper">
+        <table id="mutasiTable">
             <thead>
-                <tr style="background:#2575fc; color:black;">
-                    <th style="padding:10px; border:1px solid #ddd;">No</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Nama Barang</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Kode Barang</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Ruangan Saat Ini</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Keterangan</th>
-                    <th style="padding:10px; border:1px solid #ddd;">Aksi</th>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Barang</th>
+                    <th>Kode Barang</th>
+                    <th>Ruangan Saat Ini</th>
+                    <th>Keterangan</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 {% for b in barang_list %}
                 <tr>
-                    <td style="padding:8px; border:1px solid #ddd; text-align:center;">{{ loop.index }}</td>
-                    <td style="padding:8px; border:1px solid #ddd;">{{ b['nama_barang'] }}</td>
-                    <td style="padding:8px; border:1px solid #ddd;">{{ b['kode_barang'] }}</td>
-                    <td style="padding:8px; border:1px solid #ddd;">{{ b['nama_ruangan'] }}</td>
-                    <td style="padding:8px; border:1px solid #ddd;">{{ b.get('keterangan_luar', '') }}</td>
-                    <td style="padding:8px; border:1px solid #ddd; text-align:center;">
-                        <form method="POST" action="{{ url_for('mutasi.mutasi_barang', barang_id=b['_id']) }}" 
-                              style="display:flex; flex-wrap:wrap; justify-content:center; gap:5px; align-items:center;">
-                            
-                            <select name="ruangan_tujuan_id" class="ruanganSelect" required 
-                                    style="padding:6px; border-radius:4px; min-width:120px;">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ b['nama_barang'] }}</td>
+                    <td>{{ b['kode_barang'] }}</td>
+                    <td>{{ b['nama_ruangan'] }}</td>
+                    <td>{{ b.get('keterangan_luar', '') }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('mutasi.mutasi_barang', barang_id=b['_id']) }}" class="aksi-form">
+                            <select name="ruangan_tujuan_id" class="ruanganSelect" required>
                                 <option value="" disabled selected>-- Pilih Ruangan --</option>
                                 {% for r in ruangan_list %}
                                 <option value="{{ r['_id'] }}">{{ r['nama_ruangan'] }}</option>
@@ -45,11 +41,9 @@
                             </select>
 
                             <input type="text" name="keterangan_luar" class="keteranganLuar" 
-                                   placeholder="Keterangan (tujuan luar kantor)" style="display:none; padding:6px; border-radius:4px;">
+                                   placeholder="Keterangan (tujuan luar kantor)" style="display:none;">
 
-                            <button type="submit" style="padding:6px 12px; border:none; border-radius:6px; background:#2575fc; color:white; cursor:pointer;">
-                                Mutasi
-                            </button>
+                            <button type="submit" class="btn-primary">Mutasi</button>
                         </form>
                     </td>
                 </tr>
@@ -59,27 +53,135 @@
     </div>
 
     <!-- Pagination -->
-    <div style="margin-top:10px; text-align:center;">
-        <button id="prevBtn" style="padding:6px 12px; margin-right:5px; border:none; border-radius:6px; background:#2575fc; color:white; cursor:pointer;">Previous</button>
-        <button id="nextBtn" style="padding:6px 12px; border:none; border-radius:6px; background:#2575fc; color:white; cursor:pointer;">Next</button>
+    <div class="pagination">
+        <button id="prevBtn" class="btn-primary">Previous</button>
+        <button id="nextBtn" class="btn-primary">Next</button>
     </div>
 </div>
 
 <style>
-    table tr:nth-child(even) { background:#f9f9f9; }
-    table tr:hover { background:#e6f0ff; }
-    button:hover { background:#1a5edb; }
-    button:disabled { background:#ccc; cursor:not-allowed; }
+/* Container utama */
+.mutasi-container {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 20px;
+    animation: fadeIn 0.6s ease-in-out;
+}
 
-    /* Mobile responsiveness */
-    @media (max-width:600px) {
-        input#searchInput { width:100%; margin-bottom:10px; }
-        table { font-size:12px; }
-        table th, table td { padding:6px; }
-        form select { min-width:100px; }
-        form button { padding:5px 8px; font-size:12px; }
-        form input.keteranganLuar { width:100%; margin-top:5px; }
-    }
+/* Animasi masuk */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Judul */
+.title {
+    text-align: center;
+    color: #1e3c72;
+    margin-bottom: 20px;
+    font-size: 1.7rem;
+    font-weight: bold;
+}
+
+/* Search bar */
+.search-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+.search-bar input {
+    flex: 1 1 250px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    min-width: 200px;
+    transition: 0.3s;
+}
+.search-bar input:focus {
+    border-color: #2575fc;
+    outline: none;
+    box-shadow: 0 0 6px rgba(37,117,252,0.3);
+}
+
+/* Table wrapper */
+.table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* Tabel */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+thead tr {
+    background: linear-gradient(90deg, #2575fc, #6a11cb);
+    color: #fff;
+    text-align: center;
+}
+th, td {
+    padding: 12px;
+    border: 1px solid #eee;
+    text-align: center;
+    font-size: 14px;
+}
+tbody tr:nth-child(even) { background: #f9f9f9; }
+tbody tr:hover { background: #e6f0ff; transition: 0.2s; }
+
+/* Form aksi */
+.aksi-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    align-items: center;
+}
+.aksi-form select, 
+.aksi-form input {
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+}
+.aksi-form input.keteranganLuar {
+    width: 100%;
+}
+
+/* Button */
+.btn-primary {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 6px;
+    background: #2575fc;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+.btn-primary:hover { 
+    background: #1a5edb; 
+    transform: scale(1.05);
+}
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+/* Pagination */
+.pagination {
+    margin-top: 15px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    table { font-size: 12px; }
+    th, td { padding: 8px; }
+    .aksi-form { flex-direction: column; }
+    .aksi-form select, .aksi-form input, .aksi-form button { width: 100%; }
+}
 </style>
 
 <script>

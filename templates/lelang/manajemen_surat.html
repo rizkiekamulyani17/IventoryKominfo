@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Manajemen Surat{% endblock %}
+{% block content %}
+<div class="container mt-4" style="font-family: 'Inter', sans-serif;">
+  <h2 class="fw-bold text-primary mb-4">📂 Manajemen Surat</h2>
+
+  <!-- Tombol buka modal upload -->
+  <div class="d-flex justify-content-end mb-3">
+    <button
+      type="button"
+      class="btn btn-success"
+      data-bs-toggle="modal"
+      data-bs-target="#uploadModal">
+      <i class="bi bi-plus-circle me-1"></i> Upload Dokumen
+    </button>
+  </div>
+
+  <!-- Tabel daftar surat -->
+  <div class="table-responsive shadow-sm">
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>No</th>
+          <th>Nama Surat</th>
+          <th>Keterangan</th>
+          <th>Tanggal</th>
+          <th>Preview</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for surat in items %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ surat.nama_surat }}</td>
+          <td>{{ surat.keterangan }}</td>
+          <td>{{ surat.tanggal }}</td>
+          <td>
+            {% if surat.filename %}
+              {% set file_url = url_for('static', filename='uploads/' ~ surat.filename) %}
+              {% if surat.filename.lower().endswith(('.png', '.jpg', '.jpeg')) %}
+                <a href="{{ file_url }}" target="_blank">
+                  <img src="{{ file_url }}" alt="Preview" class="img-thumbnail" style="max-height: 70px;">
+                </a>
+              {% else %}
+                <a href="{{ file_url }}" target="_blank">
+                  <i class="bi bi-file-earmark-text fs-4 text-primary"></i> Buka Dokumen
+                </a>
+              {% endif %}
+            {% else %}
+              <span class="text-muted fst-italic">Tidak ada file</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <!-- Tombol Edit -->
+            <button
+              type="button"
+              class="btn btn-warning btn-sm"
+              data-bs-toggle="modal"
+              data-bs-target="#editModal{{ surat._id }}">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+
+            <!-- Tombol Hapus -->
+            <form
+              action="{{ url_for('manajemen_surat_bp.hapus_surat', item_id=surat._id) }}"
+              method="POST"
+              class="d-inline"
+              onsubmit="return confirm('Yakin hapus surat ini?');">
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+
+        <!-- Modal Edit -->
+        <div class="modal fade" id="editModal{{ surat._id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <form
+                action="{{ url_for('manajemen_surat_bp.edit_surat', item_id=surat._id) }}"
+                method="POST"
+                enctype="multipart/form-data">
+                <div class="modal-header">
+                  <h5 class="modal-title">✏️ Edit Surat</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">Nama Surat</label>
+                    <input type="text" class="form-control" name="nama_surat" value="{{ surat.nama_surat }}" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Keterangan</label>
+                    <input type="text" class="form-control" name="keterangan" value="{{ surat.keterangan }}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" class="form-control" name="tanggal" value="{{ surat.tanggal }}" required>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Ganti File (opsional)</label>
+                    <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png,.docx">
+                    {% if surat.filename %}
+                      <small class="text-muted">File saat ini: {{ surat.filename }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                  <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Upload -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form
+        action="{{ url_for('manajemen_surat_bp.manajemen_surat') }}"
+        method="POST"
+        enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title">📤 Upload Surat</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nama Surat</label>
+            <input type="text" class="form-control" name="nama_surat" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">File</label>
+            <input type="file" class="form-control" name="file" accept=".pdf,.jpg,.jpeg,.png,.docx" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Keterangan</label>
+            <input type="text" class="form-control" name="keterangan">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tanggal</label>
+            <input type="date" class="form-control" name="tanggal" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

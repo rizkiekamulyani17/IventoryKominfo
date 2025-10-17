@@ -26,16 +26,18 @@ def index():
 
     filtered_barang = []
     for b in barang_list:
-        ruangan_id = b.get('ruangan_id')
-        keterangan_luar = b.get('keterangan_luar')
+        # 🚫 Jangan tampilkan barang yang status lelangnya selesai
+        if (b.get('status_lelang') or '').strip().lower() == 'selesai':
+            continue
 
-        # Hanya tampilkan barang yang ada di ruangan normal (tidak dimutasi ke luar kantor)
-        if ruangan_id:  
+        ruangan_id = b.get('ruangan_id')
+        if ruangan_id:
             b['nama_ruangan'] = ruangan_dict.get(str(ruangan_id), 'Belum Ada')
-            b['keterangan_luar'] = ''  # pastikan kosong
+            b['keterangan_luar'] = ''
             filtered_barang.append(b)
 
     return render_template('mutasi.html', barang_list=filtered_barang, ruangan_list=ruangan_list)
+
 
 from models.histori_mutasi_model import catat_mutasi
 

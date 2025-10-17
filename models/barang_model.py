@@ -1,8 +1,8 @@
-from config import db
-from models.ruangan_model import generate_qris,get_ruangan_by_id
+from config import db, barang_collection, histori_mutasi_collection
+from models.ruangan_model import generate_qris, get_ruangan_by_id
 import qrcode
-
-
+from datetime import datetime
+from bson import ObjectId
 barang_collection = db['barang']
 
 def generate_kode_barang(base_kode, urutan):
@@ -67,13 +67,27 @@ def hapus_barang(barang_id):
 def get_all_barang():
     result = list(barang_collection.find().sort("tahun", 1))
     barang_list = []
+
     for item in result:
-        # Skip barang yang sudah dimutasi ke luar kantor
-        if item.get("ruangan_id") is None and item.get("keterangan_luar"):
+        status_lelang = (item.get("status_lelang") or "").strip().lower()
+
+        # 🧹 Jika barang status lelangnya selesai, pindahkan ke histori_mutasi
+        if status_lelang == "selesai":
+            histori_mutasi_collection.insert_one({
+                "barang_id": item["_id"],
+                "snapshot_barang": item,  # simpan semua data barang saat ini
+                "tanggal_mutasi": datetime.now(),
+                "keterangan": "Lelang selesai",
+                "ruangan_asal_id": item.get("ruangan_id"),
+                "status_mutasi": "LELANG"
+            })
+
+            # 🗑️ Hapus barang dari tabel barang
+            barang_collection.delete_one({"_id": ObjectId(item["_id"])})
             continue
 
+        # ✅ Barang yang bukan lelang selesai akan tetap ditampilkan
         ruangan = get_ruangan_by_id(item["ruangan_id"]) if item.get("ruangan_id") else None
-
         barang_list.append({
             "_id": str(item["_id"]),
             "no": item.get("no", 0),
@@ -90,14 +104,13 @@ def get_all_barang():
             "keterangan": item.get("keterangan", "-"),
             "qris_path": item.get("qris_path", ""),
             "foto": item.get("foto", ""),
-            "file_bast": item.get("file_bast", ""),  # <-- tambahkan di sini
+            "file_bast": item.get("file_bast", ""),
+            "status_lelang": item.get("status_lelang", ""),
             "nama_ruangan": ruangan["nama_ruangan"] if ruangan else "Tidak diketahui",
             "ruangan_id": str(item["ruangan_id"]) if item.get("ruangan_id") else None
         })
+
     return barang_list
-
-
-
 
 
 def update_kondisi_barang(barang_id, kondisi_baru):
@@ -132,6 +145,10 @@ def update_barang(barang_id, data_baru):
     # 🔹 Tambahkan update foto jika ada
     if data_baru.get("foto"):
         update_fields["foto"] = data_baru["foto"]
+
+    # 🔹 Tambahkan update file BAST jika ada
+    if "file_bast" in data_baru:
+        update_fields["file_bast"] = data_baru.get("file_bast")
 
     barang_collection.update_one(
         {"_id": ObjectId(barang_id)},

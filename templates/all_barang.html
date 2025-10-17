@@ -8,99 +8,142 @@
     <form method="get" action="{{ url_for('barang.all_barang') }}" class="row mb-3">
         <div class="col-md-10">
             <input type="text" name="q" value="{{ request.args.get('q','') }}" 
-                   class="form-control" placeholder="Cari barang (nama, merk, tahun, ruangan)">
+                   class="form-control" placeholder="🔍 Cari barang (nama, merk, tahun, ruangan)">
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">🔍 Cari</button>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Cari
+            </button>
         </div>
     </form>
 
     <p><strong>Total Barang:</strong> {{ barang|length }}</p>
 
-    <table class="table table-bordered table-striped align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>No</th>
-                <th>Foto</th>
-                <th>Nama / Jenis Barang</th>
-                <th>Kode Barang</th>
-                <th>Merk / Type</th>
-                <th>No. Seri Pabrik</th>
-                <th>Ukuran</th>
-                <th>Bahan</th>
-                <th>Tahun</th>
-                <th>Ruangan</th>
-                <th>Kondisi</th>
-                <th>Harga Beli</th>
-                <th>Keterangan</th>
-                <th>File BAST</th>
-                {% if session.get('username') or request.args.get('token') in config.PUBLIC_TOKENS %}
-                    <th>Aksi</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for b in barang %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>
-                    {% if b.foto %}
-                        {% if b.foto is string %}
-                            <img src="{{ url_for('static', filename=b.foto.replace('static/','')) }}"
-                                 alt="Foto {{ b.nama_barang }}" style="max-width:200px; max-height:200px;" 
-                                 class="img-thumbnail me-2 mb-2">
-                        {% elif b.foto is iterable %}
-                            <div class="d-flex flex-wrap">
-                                {% for f in b.foto %}
-                                    <img src="{{ url_for('static', filename=f.replace('static/','')) }}"
-                                         alt="Foto {{ b.nama_barang }}" style="max-width:200px; max-height:200px;" 
-                                         class="img-thumbnail me-2 mb-2">
-                                {% endfor %}
-                            </div>
+    <div class="table-responsive">
+        <table id="barangTable" class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>No</th>
+                    <th>Foto</th>
+                    <th>Nama / Jenis Barang</th>
+                    <th>Kode Barang</th>
+                    <th>Merk / Type</th>
+                    <th>No. Seri</th>
+                    <th>Ukuran</th>
+                    <th>Bahan</th>
+                    <th>Tahun</th>
+                    <th>Ruangan</th>
+                    <th>Kondisi</th>
+                    <th>Harga Beli</th>
+                    <th>Keterangan</th>
+                    <th>File BAST</th>
+                    {% if session.get('username') or request.args.get('token') in config.PUBLIC_TOKENS %}
+                        <th class="text-center">Aksi</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in barang %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {% if b.foto %}
+                            {% if b.foto is string %}
+                                <img src="{{ url_for('static', filename=b.foto.replace('static/','')) }}"
+                                     alt="Foto {{ b.nama_barang }}"
+                                     class="img-thumbnail"
+                                     style="max-width:100px; cursor:pointer;"
+                                     data-bs-toggle="modal" data-bs-target="#fotoModal{{ b._id }}">
+                            {% elif b.foto is iterable %}
+                                <div class="d-flex flex-wrap">
+                                    {% for f in b.foto %}
+                                        <img src="{{ url_for('static', filename=f.replace('static/','')) }}"
+                                             alt="Foto {{ b.nama_barang }}"
+                                             class="img-thumbnail me-2 mb-2"
+                                             style="max-width:100px; cursor:pointer;"
+                                             data-bs-toggle="modal" data-bs-target="#fotoModal{{ b._id }}-{{ loop.index }}">
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Tidak ada foto</span>
                         {% endif %}
-                    {% else %}
-                        <span class="text-muted">Tidak ada foto</span>
+                    </td>
+
+                    <td>{{ b.nama_barang }}</td>
+                    <td>{{ b.kode_barang }}</td>
+                    <td>{{ b.merk }}</td>
+                    <td>{{ b.no_seri }}</td>
+                    <td>{{ b.ukuran }}</td>
+                    <td>{{ b.bahan }}</td>
+                    <td>{{ b.tahun }}</td>
+                    <td>{{ b.nama_ruangan }}</td>
+                    <td>{{ b.kondisi }}</td>
+                    <td>Rp {{ "{:,.0f}".format(b.harga_beli|default(0)) }}</td>
+                    <td>{{ b.keterangan or '-' }}</td>
+
+                    <!-- File BAST -->
+                    <td>
+                        {% if b.file_bast %}
+                            {% set filename = b.file_bast.split('/')[-1] %}
+                            <a href="{{ url_for('static', filename=b.file_bast.replace('static/','')) }}" target="_blank">
+                                <i class="bi bi-file-earmark-text"></i> {{ filename }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Tidak ada</span>
+                        {% endif %}
+                    </td>
+
+                    {% if session.get('username') or request.args.get('token') in config.PUBLIC_TOKENS %}
+                    <td class="text-center">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-gear"></i> Aksi
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('barang.edit', barang_id=b._id) }}">
+                                        <i class="bi bi-pencil-square me-2"></i>Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{{ url_for('barang.hapus', barang_id=b._id) }}"
+                                       onclick="return confirm('Yakin ingin menghapus barang ini?')">
+                                        <i class="bi bi-trash me-2"></i>Hapus
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
                     {% endif %}
-                </td>
-
-                <td>{{ b.nama_barang }}</td>
-                <td>{{ b.kode_barang }}</td>
-                <td>{{ b.merk }}</td>
-                <td>{{ b.no_seri }}</td>
-                <td>{{ b.ukuran }}</td>
-                <td>{{ b.bahan }}</td>
-                <td>{{ b.tahun }}</td>
-                <td>{{ b.nama_ruangan }}</td>
-                <td>{{ b.kondisi }}</td>
-                <td>{{ "%.2f"|format(b.harga_beli|default(0)) }}</td>
-                <td>{{ b.keterangan or '-' }}</td>
-
-                <!-- File BAST -->
-                <td>
-                    {% if b.file_bast %}
-                        {% set filename = b.file_bast.split('/')[-1] %}
-                        <a href="{{ url_for('static', filename=b.file_bast.replace('static/','')) }}" target="_blank">
-                            {{ filename }}
-                        </a>
-                    {% else %}
-                        <span class="text-muted">Tidak ada</span>
-                    {% endif %}
-                </td>
-
-                {% if session.get('username') or request.args.get('token') in config.PUBLIC_TOKENS %}
-                <td>
-                    <a href="{{ url_for('barang.edit', barang_id=b._id) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="{{ url_for('barang.hapus', barang_id=b._id) }}" class="btn btn-danger btn-sm"
-                       onclick="return confirm('Yakin ingin menghapus barang ini?')">Hapus</a>
-                </td>
-                {% endif %}
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="16" class="text-center text-muted">Tidak ada data ditemukan</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="16" class="text-center text-muted">Tidak ada data ditemukan</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#barangTable').DataTable({
+            "pageLength": 10,
+            "ordering": true,
+            "searching": true,
+            "language": {
+                "search": "🔍 Cari:",
+                "lengthMenu": "Tampilkan _MENU_ data per halaman",
+                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data"
+            }
+        });
+    });
+</script>
 {% endblock %}

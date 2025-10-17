@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models.pengaturan_model import get_pengaturan, update_pengaturan
+from utils.auth import login_or_token_required 
 
 pengaturan_bp = Blueprint("pengaturan", __name__)
 
 @pengaturan_bp.route("/pengaturan", methods=["GET", "POST"])
+@login_or_token_required
 def pengaturan():
     if request.method == "POST":
         update_pengaturan(

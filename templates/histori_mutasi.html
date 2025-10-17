@@ -1,60 +1,104 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 style="text-align:center; margin-bottom:20px; color:#1e3c72;">Histori Mutasi Barang</h2>
+<div class="container py-4" style="font-family:'Segoe UI', sans-serif;">
+    <!-- Judul -->
+    <h2 class="fw-bold text-center mb-4" style="color:#1e3c72;">
+        </i> Histori Mutasi Barang
+    </h2>
 
-<div style="overflow-x:auto;">
-    <table class="table table-hover">
-        <thead>
-    <tr>
-        <th>No</th>
-        <th>Nama Barang</th>
-        <th>Merk</th>
-        <th>No Seri</th>
-        <th>Ukuran</th>
-        <th>Bahan</th>
-        <th>Tahun</th>
-        <th>Jumlah</th>
-        <th>Kondisi</th>
-        <th>Kode Barang</th>
-        <th>Harga Beli</th>
-        <th>Keterangan</th>
-        <th>Ruangan Asal</th>
-        <th>Ruangan Tujuan</th>
-        <th>Keterangan Mutasi</th>
-        <th>Tanggal Mutasi</th>
-        <th>Aksi</th>
-    </tr>
-</thead>
-<tbody>
-    {% for h in histori_list %}
-    <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ h['nama_barang'] }}</td>
-        <td>{{ h['merk'] }}</td>
-        <td>{{ h['no_seri'] }}</td>
-        <td>{{ h['ukuran'] }}</td>
-        <td>{{ h['bahan'] }}</td>
-        <td>{{ h['tahun'] }}</td>
-        <td>{{ h['jumlah'] }}</td>
-        <td>{{ h['kondisi'] }}</td>
-        <td>{{ h['kode_barang'] }}</td>
-        <td>{{ h['harga_beli'] }}</td>
-        <td>{{ h['keterangan'] }}</td>
-        <td>{{ h['nama_ruangan_asal'] }}</td>
-        <td>{{ h['nama_ruangan_tujuan'] }}</td>
-        <td>{{ h.get('keterangan_luar', '') }}</td>
-        <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
-        <td>
-            <form action="{{ url_for('histori_mutasi.hapus', id=h['id']) }}" method="post"
-                  onsubmit="return confirm('Yakin ingin menghapus data ini?');">
-                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-            </form>
-        </td>
-    </tr>
-    {% endfor %}
-</tbody>
-
-    </table>
+    <!-- Tabel -->
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle m-0">
+            <thead class="table-header">
+                <tr>
+                    <th>No</th>
+                    <th>Nama Barang</th>
+                    <th>Merk</th>
+                    <th>No Seri</th>
+                    <th>Ukuran</th>
+                    <th>Bahan</th>
+                    <th>Tahun</th>
+                    <th>Jumlah</th>
+                    <th>Kondisi</th>
+                    <th>Kode Barang</th>
+                    <th>Harga Beli</th>
+                    <th>Keterangan</th>
+                    <th>Ruangan Asal</th>
+                    <th>Ruangan Tujuan</th>
+                    <th>Keterangan Mutasi</th>
+                    <th>Tanggal Mutasi</th>
+                    <th class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in histori_list %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ h['nama_barang'] }}</td>
+                    <td>{{ h['merk'] }}</td>
+                    <td>{{ h['no_seri'] }}</td>
+                    <td>{{ h['ukuran'] }}</td>
+                    <td>{{ h['bahan'] }}</td>
+                    <td>{{ h['tahun'] }}</td>
+                    <td>{{ h['jumlah'] }}</td>
+                    <td>{{ h['kondisi'] }}</td>
+                    <td>{{ h['kode_barang'] }}</td>
+                    <td>{{ h['harga_beli'] }}</td>
+                    <td>{{ h['keterangan'] }}</td>
+                    <td>{{ h['nama_ruangan_asal'] }}</td>
+                    <td>{{ h['nama_ruangan_tujuan'] }}</td>
+                    <td>{{ h.get('keterangan_luar', '') }}</td>
+                    <td>{{ h['tanggal_mutasi'].strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                    <td class="text-center">
+                        <form action="{{ url_for('histori_mutasi.hapus', id=h['id']) }}" method="post"
+                              onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                            <button type="submit" class="btn btn-sm btn-danger shadow-sm">
+                                <i class="bi bi-trash"></i> Hapus
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="17" class="text-center text-muted">Belum ada data mutasi barang</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<style>
+/* 🎨 Header tabel */
+.table-header th {
+    background-color: #1e3c72; /* 🔵 Biru */
+    color: #fff;              /* ⚪ Teks putih */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Baris tabel */
+.table tbody tr:nth-child(odd) { background-color: #f8f9fa; }
+.table tbody tr:hover { background-color: rgba(30,60,114,0.1); }
+
+/* Tombol */
+.btn-danger {
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.btn-danger:hover {
+    transform: scale(1.05);
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+    h2 { font-size: 1.25rem; }
+    table th, table td { font-size: 0.8rem; padding: 6px; }
+    .btn { font-size: 0.75rem; padding: 4px 8px; }
+}
+</style>
 {% endblock %}
