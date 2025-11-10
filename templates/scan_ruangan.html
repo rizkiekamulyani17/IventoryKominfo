@@ -34,15 +34,18 @@
 
                 <tr style="text-align:center; border-bottom:1px solid #ddd; transition: background 0.3s;">
                     <td style="padding:8px;">{{ loop.index }}</td>
-                    <td style="padding:8px;">
-                        {% if b['foto'] %}
-                            <img src="{{ url_for('static', filename=b['foto'].replace('static/','')) }}" 
-                                 alt="Foto {{ b['nama_barang'] }}" 
-                                 style="max-width:60px; max-height:60px; width:auto; height:auto; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.2);">
-                        {% else %}
-                            <span style="color:#999;">Tidak ada foto</span>
-                        {% endif %}
-                    </td>
+                    <td class="text-center">
+    {% if b['foto'] %}
+        {% for f in b['foto'] %}
+            <img src="{{ url_for('static', filename=f.replace('static/','')) }}"
+                 alt="Foto {{ b['nama_barang'] }}"
+                 style="max-width:60px; max-height:60px; border-radius:6px; margin:2px;">
+        {% endfor %}
+    {% else %}
+        <span class="text-muted">Tidak ada foto</span>
+    {% endif %}
+</td>
+
                     <td style="padding:8px;">{{ b['kode_barang'] }}</td>
                     <td style="padding:8px;">{{ b['nama_barang'] }}</td>
                     <td style="padding:8px;">{{ b['merk'] }}</td>

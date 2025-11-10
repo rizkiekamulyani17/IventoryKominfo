@@ -95,7 +95,8 @@ def detail(ruangan_id):
         ]
 
     # Urutkan barang berdasarkan 'tahun' ascending
-    barang = sorted(barang, key=lambda x: int(x.get('tahun', 0)))
+    barang = sorted(barang, key=lambda x: int(x.get('tahun') or 0))
+
 
     return render_template('detail_ruangan.html', ruangan=ruangan, barang=barang)
 
@@ -146,6 +147,25 @@ def detail(ruangan_id):
 #     return render_template("scan_ruangan.html", ruangan=ruangan, barang_list=barang_list)
 
 
+# @ruangan_bp.route('/download_qris/<ruangan_id>')
+# @login_or_token_required
+# def download_qris_ruangan(ruangan_id):
+#     ruangan = get_ruangan_by_id(ruangan_id)
+#     if not ruangan or not ruangan.get('qris_path'):
+#         abort(404)
+
+#     file_path = ruangan['qris_path']  # path sudah ada di DB, misal "static/qris/UUID.png"
+#     if not os.path.exists(file_path):
+#         abort(404)
+
+#     filename = f"{ruangan['nama_ruangan'].replace(' ', '_')}.png"
+#     return send_file(file_path, as_attachment=True, download_name=filename)
+from flask import send_file, abort
+from PIL import Image, ImageDraw, ImageFont
+import os
+from io import BytesIO
+import textwrap
+
 @ruangan_bp.route('/download_qris/<ruangan_id>')
 @login_or_token_required
 def download_qris_ruangan(ruangan_id):
@@ -153,12 +173,60 @@ def download_qris_ruangan(ruangan_id):
     if not ruangan or not ruangan.get('qris_path'):
         abort(404)
 
-    file_path = ruangan['qris_path']  # path sudah ada di DB, misal "static/qris/UUID.png"
+    file_path = ruangan['qris_path']  # contoh: "static/qris/UUID.png"
     if not os.path.exists(file_path):
         abort(404)
 
-    filename = f"{ruangan['nama_ruangan'].replace(' ', '_')}.png"
-    return send_file(file_path, as_attachment=True, download_name=filename)
+    # 🔹 Buka gambar QR
+    img = Image.open(file_path).convert("RGB")
+
+    # 🔹 Siapkan font
+    try:
+        font = ImageFont.truetype("arial.ttf", 20)
+    except:
+        font = ImageFont.load_default()
+
+    # 🔹 Bungkus teks agar tidak kepotong
+    text = ruangan['nama_ruangan']
+    max_width_chars = 25  # jumlah karakter per baris sebelum dibungkus
+    wrapped_text = "\n".join(textwrap.wrap(text, width=max_width_chars))
+
+    # 🔹 Hitung tinggi teks total menggunakan textbbox (Pillow ≥ 10)
+    dummy_img = Image.new("RGB", (10, 10))
+    draw_dummy = ImageDraw.Draw(dummy_img)
+
+    lines = wrapped_text.split("\n")
+    text_height = 0
+    for line in lines:
+        bbox = draw_dummy.textbbox((0, 0), line, font=font)
+        text_height += (bbox[3] - bbox[1]) + 5  # tinggi tiap baris + jarak antarbaris
+
+    # 🔹 Siapkan kanvas baru
+    width, height = img.size
+    extra_height = text_height + 40
+    new_img = Image.new("RGB", (width, height + extra_height), "white")
+
+    # 🔹 Gambar teks di atas QR
+    draw = ImageDraw.Draw(new_img)
+    y_offset = 20
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        line_width = bbox[2] - bbox[0]
+        x = (width - line_width) / 2
+        draw.text((x, y_offset), line, fill="black", font=font)
+        y_offset += (bbox[3] - bbox[1]) + 5
+
+    # 🔹 Tempel QR di bawah teks
+    new_img.paste(img, (0, extra_height))
+
+    # 🔹 Simpan ke buffer dan kirim
+    output = BytesIO()
+    new_img.save(output, format="PNG")
+    output.seek(0)
+
+    filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.png"
+    return send_file(output, as_attachment=True, download_name=filename, mimetype='image/png')
+
 
 # @ruangan_bp.route('/download_semua_qris/<ruangan_id>')
 # @login_required
