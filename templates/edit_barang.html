@@ -115,6 +115,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let stream;
+    let useFrontCamera = false; // default: kamera belakang
     const fotoInput = document.getElementById('fotoFile');
     const previewContainer = document.getElementById('previewContainer');
     const video = document.getElementById('camera');
@@ -128,7 +129,94 @@ document.addEventListener("DOMContentLoaded", function() {
     let dataTransfer = new DataTransfer();
     let fotoHapus = [];
 
-    // --- Foto Barang ---
+    // =============== TOMBOL GANTI KAMERA ===============
+    const switchBtn = document.createElement("button");
+    switchBtn.textContent = "🔁 Ganti Kamera";
+    switchBtn.type = "button";
+    switchBtn.classList.add("btn", "btn-secondary", "mt-2", "ms-2");
+    document.querySelector(".btn-info.mt-2").after(switchBtn);
+
+    const modeInfo = document.createElement("small");
+    modeInfo.classList.add("text-muted", "ms-2");
+    document.querySelector(".btn-info.mt-2").after(modeInfo);
+
+    switchBtn.addEventListener("click", () => {
+        useFrontCamera = !useFrontCamera;
+        openCamera();
+    });
+
+    // =============== BUKA KAMERA ===============
+    window.openCamera = function() {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            alert("Kamera tidak didukung di perangkat ini.");
+            return;
+        }
+
+        // hentikan kamera sebelumnya
+        if (stream) stream.getTracks().forEach(t => t.stop());
+
+        navigator.mediaDevices.getUserMedia({
+            video: { facingMode: useFrontCamera ? "user" : { exact: "environment" } }
+        }).then(s => {
+            stream = s;
+            video.srcObject = stream;
+            video.style.display = 'block';
+            captureBtn.style.display = 'inline-block';
+            modeInfo.textContent = useFrontCamera ? "Mode: Kamera Depan" : "Mode: Kamera Belakang";
+        }).catch(err => {
+            alert('Tidak bisa mengakses kamera: ' + err);
+        });
+    }
+
+    // =============== CAPTURE & KOMPRES FOTO ===============
+    captureBtn.addEventListener('click', function() {
+        if (!stream) return;
+
+        const canvas = document.createElement('canvas');
+        const scale = 0.6; // perkecil ukuran resolusi 60%
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Simpan sebagai JPEG kualitas 0.7
+        canvas.toBlob(blob => {
+            if (!blob) return;
+            if (blob.size > 1024 * 1024) {
+                alert("Ukuran gambar lebih dari 1MB (" + (blob.size / 1024).toFixed(0) + " KB). Ambil ulang dengan pencahayaan lebih terang.");
+            }
+            const file = new File([blob], "foto_barang.jpg", { type: "image/jpeg" });
+            dataTransfer.items.add(file);
+            fotoInput.files = dataTransfer.files;
+
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('foto-wrapper','position-relative','d-inline-block','me-2','mb-2');
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxHeight = '100px';
+            img.classList.add('img-thumbnail');
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.classList.add('btn','btn-sm','btn-danger','position-absolute','top-0','end-0','remove-foto');
+            btn.innerHTML = '&times;';
+            btn.addEventListener('click', function() {
+                wrapper.remove();
+                dataTransfer.items.remove(dataTransfer.items.length - 1);
+                fotoInput.files = dataTransfer.files;
+            });
+            wrapper.appendChild(img);
+            wrapper.appendChild(btn);
+            previewContainer.appendChild(wrapper);
+        }, 'image/jpeg', 0.7);
+
+        // tutup kamera setelah capture
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.style.display = 'none';
+        captureBtn.style.display = 'none';
+        modeInfo.textContent = "";
+    });
+
+    // =============== HAPUS FOTO ===============
     previewContainer.addEventListener('click', function(e) {
         if(e.target.classList.contains('remove-foto')){
             const wrapper = e.target.closest('.foto-wrapper');
@@ -141,81 +229,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    fotoInput.addEventListener('change', function(event) {
-        for (let file of event.target.files) {
-            dataTransfer.items.add(file);
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('foto-wrapper','position-relative','d-inline-block','me-2','mb-2');
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.style.maxHeight = '100px';
-            img.classList.add('img-thumbnail');
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.classList.add('btn','btn-sm','btn-danger','position-absolute','top-0','end-0','remove-foto');
-            btn.innerHTML = '&times;';
-            btn.addEventListener('click', function() {
-                wrapper.remove();
-                dataTransfer.items.remove(dataTransfer.items.length - 1);
-                fotoInput.files = dataTransfer.files;
-            });
-            wrapper.appendChild(img);
-            wrapper.appendChild(btn);
-            previewContainer.appendChild(wrapper);
-        }
-        fotoInput.files = dataTransfer.files;
-    });
-
-    window.openCamera = function() {
-        if (!navigator.mediaDevices?.getUserMedia) {
-            alert("Kamera tidak didukung di perangkat ini.");
-            return;
-        }
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(s => {
-                stream = s;
-                video.srcObject = stream;
-                video.style.display = 'block';
-                captureBtn.style.display = 'inline-block';
-            })
-            .catch(err => alert('Tidak bisa mengakses kamera: ' + err));
-    }
-
-    captureBtn.addEventListener('click', function() {
-        if (!stream) return;
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        canvas.toBlob(blob => {
-            const file = new File([blob], "foto_barang.png", { type: "image/png" });
-            dataTransfer.items.add(file);
-            fotoInput.files = dataTransfer.files;
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('foto-wrapper','position-relative','d-inline-block','me-2','mb-2');
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.style.maxHeight = '100px';
-            img.classList.add('img-thumbnail');
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.classList.add('btn','btn-sm','btn-danger','position-absolute','top-0','end-0','remove-foto');
-            btn.innerHTML = '&times;';
-            btn.addEventListener('click', function() {
-                wrapper.remove();
-                dataTransfer.items.remove(dataTransfer.items.length - 1);
-                fotoInput.files = dataTransfer.files;
-            });
-            wrapper.appendChild(img);
-            wrapper.appendChild(btn);
-            previewContainer.appendChild(wrapper);
-        }, 'image/png');
-        video.srcObject.getTracks().forEach(track => track.stop());
-        video.style.display = 'none';
-        captureBtn.style.display = 'none';
-    });
-
-    // --- Surat BAST ---
+    // =============== PREVIEW FILE BAST ===============
     fileInput?.addEventListener('change', function(e) {
         previewBAST.innerHTML = '';
         const file = e.target.files[0];
@@ -241,6 +255,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // =============== HAPUS FILE BAST ===============
     hapusBtn?.addEventListener('click', function() {
         hapusInput.value = "1";
         hapusBtn.disabled = true;
@@ -248,4 +263,5 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
+
 {% endblock %}
