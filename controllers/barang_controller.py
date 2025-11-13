@@ -367,12 +367,17 @@ def list_barang():
 #     return render_template('tambah_barang.html', ruangan_list=ruangan_list)
 
 
+
+from flask import request, render_template, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+import os, uuid, time
+
+UPLOAD_FOLDER_FOTO = "static/uploads/barang"
+UPLOAD_FOLDER_BAST = "static/uploads/bast"
+
 @barang_bp.route('/tambah', methods=['GET', 'POST'])
 @login_or_token_required
 def tambah():
-    import os
-    from werkzeug.utils import secure_filename
-
     ruangan_list = get_semua_ruangan()
 
     if request.method == 'POST':
@@ -392,56 +397,62 @@ def tambah():
             "keterangan": request.form.get('keterangan', '').strip()
         }
 
-        # Tangani upload foto
-        foto_files = request.files.getlist("foto[]")
-        foto_paths = []
-        for foto_file in foto_files:
-            if foto_file and foto_file.filename:
-                filename = secure_filename(foto_file.filename)
-                save_path = os.path.join("static/uploads/barang", filename)
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                foto_file.save(save_path)
-                foto_paths.append(save_path.replace("\\", "/"))
-        data["foto"] = foto_paths if foto_paths else []
-
-        # Tangani upload file BAST
-        bast_file = request.files.get("file_bast")
-        if bast_file and bast_file.filename:
-            filename = secure_filename(bast_file.filename)
-            save_path = os.path.join("static/uploads/bast", filename)
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            bast_file.save(save_path)
-            data["file_bast"] = save_path.replace("\\", "/")
-        else:
-            data["file_bast"] = None
-
-        # Validasi kode barang
+        # Validasi kode barang wajib diisi
         if not data['kode_barang_manual']:
             flash("Kode barang manual harus diisi!", "danger")
             return redirect(url_for('barang.tambah'))
 
+        # Validasi harga
         try:
             data['harga_beli'] = int(data['harga_beli']) if data['harga_beli'] else 0
         except ValueError:
             flash("Harga beli harus berupa angka!", "danger")
             return redirect(url_for('barang.tambah'))
 
-        # Simpan data ke DB
+        # ============================================================
+        # ===============  SIMPAN FOTO BARANG  =======================
+        # ============================================================
+        foto_files = request.files.getlist("foto[]")
+        foto_paths = []
+
+        # Buat folder unik sementara (berdasarkan waktu dan UUID)
+        folder_barang = os.path.join(UPLOAD_FOLDER_FOTO, f"new_{int(time.time())}_{uuid.uuid4().hex}")
+        os.makedirs(folder_barang, exist_ok=True)
+
+        for foto_file in foto_files:
+            if foto_file and foto_file.filename:
+                unique_name = f"{int(time.time())}_{uuid.uuid4().hex}_{secure_filename(foto_file.filename)}"
+                save_path = os.path.join(folder_barang, unique_name)
+                foto_file.save(save_path)
+                foto_paths.append(save_path.replace("\\", "/"))
+
+        data["foto"] = foto_paths if foto_paths else []
+
+        # ============================================================
+        # ===============  SIMPAN FILE BAST  =========================
+        # ============================================================
+        bast_file = request.files.get("file_bast")
+        if bast_file and bast_file.filename:
+            folder_bast = os.path.join(UPLOAD_FOLDER_BAST, f"new_{int(time.time())}_{uuid.uuid4().hex}")
+            os.makedirs(folder_bast, exist_ok=True)
+
+            unique_name = f"{int(time.time())}_{uuid.uuid4().hex}_{secure_filename(bast_file.filename)}"
+            save_path = os.path.join(folder_bast, unique_name)
+            bast_file.save(save_path)
+            data["file_bast"] = save_path.replace("\\", "/")
+        else:
+            data["file_bast"] = None
+
+        # ============================================================
+        # ===============  SIMPAN KE DATABASE  =======================
+        # ============================================================
         tambah_barang(data)
-        flash("Barang berhasil ditambahkan", "success")
+        flash("Barang berhasil ditambahkan beserta foto dan file BAST", "success")
         return redirect(url_for('barang.all_barang'))
 
+    # GET request
     return render_template('tambah_barang.html', ruangan_list=ruangan_list)
 
-
-
-import os
-import uuid
-import time
-from werkzeug.utils import secure_filename
-
-UPLOAD_FOLDER_FOTO = "static/uploads/barang"
-UPLOAD_FOLDER_BAST = "static/uploads/bast"
 
 @barang_bp.route('/edit/<barang_id>', methods=['GET', 'POST'])
 @login_or_token_required

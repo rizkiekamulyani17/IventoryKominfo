@@ -229,7 +229,7 @@ def detail(ruangan_id):
 
 from flask import send_file, abort
 from fpdf import FPDF
-import io, os
+import os, tempfile
 
 @ruangan_bp.route('/download_qris_ruangan/<ruangan_id>')
 @login_or_token_required
@@ -242,37 +242,31 @@ def download_qris_ruangan(ruangan_id):
     if not os.path.exists(file_path):
         abort(404)
 
-    # ✅ Siapkan PDF dengan ukuran A5 (lebih kecil dari A4)
+    # ✅ Siapkan PDF ukuran A5
     pdf = FPDF(orientation='P', unit='mm', format='A5')
     pdf.add_page()
 
-    # 🔹 Judul di atas (pakai multi_cell biar bisa wrap kalau panjang)
+    # 🔹 Judul
     pdf.set_font("Arial", 'B', 16)
     pdf.multi_cell(0, 8, f"QRIS Ruangan - {ruangan['nama_ruangan']}", align='C')
-
-    # 🔹 Sedikit jarak antara judul dan QR
     pdf.ln(1)
 
     # 🔹 Tambahkan QR di tengah halaman
-    qr_width = 70  # ukuran QR menyesuaikan A5
+    qr_width = 70
     page_width = 148  # lebar A5 dalam mm
     x_center = (page_width - qr_width) / 2
     y_pos = pdf.get_y()
     pdf.image(file_path, x=x_center, y=y_pos, w=qr_width, h=qr_width)
 
-   
-    # 🔹 Simpan ke memory buffer
-    pdf_buffer = io.BytesIO()
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
+    # ✅ Simpan ke file sementara agar aman di server Linux
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+    pdf.output(tmp.name)
 
+    # 🔹 Siapkan nama file download
     filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.pdf"
-    return send_file(
-        pdf_buffer,
-        as_attachment=True,
-        download_name=filename,
-        mimetype='application/pdf'
-    )
+
+    # ✅ Kirim file ke client
+    return send_file(tmp.name, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
 
 # @ruangan_bp.route('/download_semua_qris/<ruangan_id>')
