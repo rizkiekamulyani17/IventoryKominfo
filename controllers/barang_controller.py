@@ -150,93 +150,93 @@ def download_qris(barang_id):
 
 #     return render_template('tambah_barang.html', ruangan_list=ruangan_list)
 
-import os
-from werkzeug.utils import secure_filename
+# import os
+# from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = "static/uploads/barang"
-@barang_bp.route('/edit/<barang_id>', methods=['GET', 'POST'])
-@login_or_token_required
-def edit(barang_id):
-    barang = get_barang_by_id(barang_id)
-    if not barang:
-        flash("Barang tidak ditemukan", "danger")
-        return redirect(url_for('barang.index'))
+# UPLOAD_FOLDER = "static/uploads/barang"
+# @barang_bp.route('/edit/<barang_id>', methods=['GET', 'POST'])
+# @login_or_token_required
+# def edit(barang_id):
+#     barang = get_barang_by_id(barang_id)
+#     if not barang:
+#         flash("Barang tidak ditemukan", "danger")
+#         return redirect(url_for('barang.index'))
 
-    ruangan_list = get_semua_ruangan()
-    UPLOAD_FOTO = "static/uploads/barang"
-    UPLOAD_BAST = "static/uploads/bast"
+#     ruangan_list = get_semua_ruangan()
+#     UPLOAD_FOTO = "static/uploads/barang"
+#     UPLOAD_BAST = "static/uploads/bast"
 
-    if request.method == 'POST':
-        data_baru = {
-            "nama_barang": request.form.get('nama_barang', '').strip(),
-            "kode_barang": request.form.get('kode_barang', '').strip(),
-            "merk": request.form.get('merk', '').strip(),
-            "no_seri": request.form.get('no_seri', '').strip(),
-            "ukuran": request.form.get('ukuran', '').strip(),
-            "bahan": request.form.get('bahan', '').strip(),
-            "tahun": request.form.get('tahun', '').strip(),
-            "jumlah": int(request.form.get('jumlah', 1)),
-            "kondisi": request.form.get('kondisi', 'Baik'),
-            "ruangan_id": request.form.get('ruangan_id'),
-            "harga_beli": int(request.form.get('harga_beli', 0)),
-            "keterangan": request.form.get('keterangan', '').strip()
-        }
+#     if request.method == 'POST':
+#         data_baru = {
+#             "nama_barang": request.form.get('nama_barang', '').strip(),
+#             "kode_barang": request.form.get('kode_barang', '').strip(),
+#             "merk": request.form.get('merk', '').strip(),
+#             "no_seri": request.form.get('no_seri', '').strip(),
+#             "ukuran": request.form.get('ukuran', '').strip(),
+#             "bahan": request.form.get('bahan', '').strip(),
+#             "tahun": request.form.get('tahun', '').strip(),
+#             "jumlah": int(request.form.get('jumlah', 1)),
+#             "kondisi": request.form.get('kondisi', 'Baik'),
+#             "ruangan_id": request.form.get('ruangan_id'),
+#             "harga_beli": int(request.form.get('harga_beli', 0)),
+#             "keterangan": request.form.get('keterangan', '').strip()
+#         }
 
-        # ===================== FOTO BARANG =====================
-        foto_paths = barang.get("foto", [])
-        hapus_foto = request.form.get('hapus_foto[]', '')
-        if hapus_foto:
-            hapus_list = hapus_foto.split(',')
-            foto_paths = [f for f in foto_paths if f not in hapus_list]
-            for f in hapus_list:
-                if os.path.exists(f):
-                    os.remove(f)
+#         # ===================== FOTO BARANG =====================
+#         foto_paths = barang.get("foto", [])
+#         hapus_foto = request.form.get('hapus_foto[]', '')
+#         if hapus_foto:
+#             hapus_list = hapus_foto.split(',')
+#             foto_paths = [f for f in foto_paths if f not in hapus_list]
+#             for f in hapus_list:
+#                 if os.path.exists(f):
+#                     os.remove(f)
 
-        foto_files = request.files.getlist("foto[]")
-        for foto_file in foto_files:
-            if foto_file and foto_file.filename:
-                filename = secure_filename(foto_file.filename)
-                save_path = os.path.join(UPLOAD_FOTO, filename)
-                os.makedirs(os.path.dirname(save_path), exist_ok=True)
-                foto_file.save(save_path)
-                foto_paths.append(save_path.replace("\\", "/"))
+#         foto_files = request.files.getlist("foto[]")
+#         for foto_file in foto_files:
+#             if foto_file and foto_file.filename:
+#                 filename = secure_filename(foto_file.filename)
+#                 save_path = os.path.join(UPLOAD_FOTO, filename)
+#                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
+#                 foto_file.save(save_path)
+#                 foto_paths.append(save_path.replace("\\", "/"))
 
-        data_baru["foto"] = foto_paths
-        # ======================================================
+#         data_baru["foto"] = foto_paths
+#         # ======================================================
 
-        # ===================== FILE BAST =====================
-        hapus_bast = request.form.get("hapus_bast") == "1"
-        file_bast = request.files.get("file_bast")
-        bast_path = barang.get("file_bast")
+#         # ===================== FILE BAST =====================
+#         hapus_bast = request.form.get("hapus_bast") == "1"
+#         file_bast = request.files.get("file_bast")
+#         bast_path = barang.get("file_bast")
 
-        # Jika user hapus file lama
-        if hapus_bast and bast_path and os.path.exists(bast_path):
-            os.remove(bast_path)
-            bast_path = None
+#         # Jika user hapus file lama
+#         if hapus_bast and bast_path and os.path.exists(bast_path):
+#             os.remove(bast_path)
+#             bast_path = None
 
-        # Jika upload file baru
-        if file_bast and file_bast.filename:
-            filename = secure_filename(file_bast.filename)
-            save_path = os.path.join(UPLOAD_BAST, filename)
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            file_bast.save(save_path)
-            bast_path = save_path.replace("\\", "/")
+#         # Jika upload file baru
+#         if file_bast and file_bast.filename:
+#             filename = secure_filename(file_bast.filename)
+#             save_path = os.path.join(UPLOAD_BAST, filename)
+#             os.makedirs(os.path.dirname(save_path), exist_ok=True)
+#             file_bast.save(save_path)
+#             bast_path = save_path.replace("\\", "/")
 
-        # Simpan hasil akhir
-        if hapus_bast:
-            data_baru["file_bast"] = None
-        elif file_bast and file_bast.filename:
-            data_baru["file_bast"] = bast_path
-        else:
-            # Tetap pakai file lama jika tidak dihapus atau diubah
-            data_baru["file_bast"] = barang.get("file_bast")
-        # ======================================================
+#         # Simpan hasil akhir
+#         if hapus_bast:
+#             data_baru["file_bast"] = None
+#         elif file_bast and file_bast.filename:
+#             data_baru["file_bast"] = bast_path
+#         else:
+#             # Tetap pakai file lama jika tidak dihapus atau diubah
+#             data_baru["file_bast"] = barang.get("file_bast")
+#         # ======================================================
 
-        update_barang(barang_id, data_baru)
-        flash("Data barang berhasil diperbarui beserta file BAST-nya", "success")
-        return redirect(url_for('barang.all_barang'))
+#         update_barang(barang_id, data_baru)
+#         flash("Data barang berhasil diperbarui beserta file BAST-nya", "success")
+#         return redirect(url_for('barang.all_barang'))
 
-    return render_template('edit_barang.html', barang=barang, ruangan_list=ruangan_list)
+#     return render_template('edit_barang.html', barang=barang, ruangan_list=ruangan_list)
 
 # @barang_bp.route('/edit/<barang_id>', methods=['GET', 'POST'])
 # @login_or_token_required
@@ -432,3 +432,108 @@ def tambah():
         return redirect(url_for('barang.all_barang'))
 
     return render_template('tambah_barang.html', ruangan_list=ruangan_list)
+
+
+
+import os
+import uuid
+import time
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER_FOTO = "static/uploads/barang"
+UPLOAD_FOLDER_BAST = "static/uploads/bast"
+
+@barang_bp.route('/edit/<barang_id>', methods=['GET', 'POST'])
+@login_or_token_required
+def edit(barang_id):
+    barang = get_barang_by_id(barang_id)
+    if not barang:
+        flash("Barang tidak ditemukan", "danger")
+        return redirect(url_for('barang.index'))
+
+    ruangan_list = get_semua_ruangan()
+
+    if request.method == 'POST':
+        data_baru = {
+            "nama_barang": request.form.get('nama_barang', '').strip(),
+            "kode_barang": request.form.get('kode_barang', '').strip(),
+            "merk": request.form.get('merk', '').strip(),
+            "no_seri": request.form.get('no_seri', '').strip(),
+            "ukuran": request.form.get('ukuran', '').strip(),
+            "bahan": request.form.get('bahan', '').strip(),
+            "tahun": request.form.get('tahun', '').strip(),
+            "jumlah": int(request.form.get('jumlah', 1)),
+            "kondisi": request.form.get('kondisi', 'Baik'),
+            "ruangan_id": request.form.get('ruangan_id'),
+            "harga_beli": int(request.form.get('harga_beli', 0)),
+            "keterangan": request.form.get('keterangan', '').strip()
+        }
+
+        # =====================================================
+        # ===============  FOTO BARANG  =======================
+        # =====================================================
+        foto_paths = barang.get("foto", []) or []
+        hapus_foto = request.form.get('hapus_foto[]', '')
+
+        # Hapus foto lama jika diminta
+        if hapus_foto:
+            hapus_list = hapus_foto.split(',')
+            foto_paths = [f for f in foto_paths if f not in hapus_list]
+            for f in hapus_list:
+                if os.path.exists(f):
+                    os.remove(f)
+
+        # Simpan foto baru ke folder unik per barang
+        foto_files = request.files.getlist("foto[]")
+        folder_barang = os.path.join(UPLOAD_FOLDER_FOTO, str(barang_id))
+        os.makedirs(folder_barang, exist_ok=True)
+
+        for foto_file in foto_files:
+            if foto_file and foto_file.filename:
+                # Buat nama file unik
+                unique_name = f"{int(time.time())}_{uuid.uuid4().hex}_{secure_filename(foto_file.filename)}"
+                save_path = os.path.join(folder_barang, unique_name)
+                foto_file.save(save_path)
+                foto_paths.append(save_path.replace("\\", "/"))
+
+        data_baru["foto"] = foto_paths
+
+        # =====================================================
+        # ===============  FILE BAST  =========================
+        # =====================================================
+        hapus_bast = request.form.get("hapus_bast") == "1"
+        file_bast = request.files.get("file_bast")
+        bast_path = barang.get("file_bast")
+
+        # Folder khusus untuk file BAST per barang
+        folder_bast_barang = os.path.join(UPLOAD_FOLDER_BAST, str(barang_id))
+        os.makedirs(folder_bast_barang, exist_ok=True)
+
+        # Jika user hapus file lama
+        if hapus_bast and bast_path and os.path.exists(bast_path):
+            os.remove(bast_path)
+            bast_path = None
+
+        # Jika upload file baru
+        if file_bast and file_bast.filename:
+            unique_name = f"{int(time.time())}_{uuid.uuid4().hex}_{secure_filename(file_bast.filename)}"
+            save_path = os.path.join(folder_bast_barang, unique_name)
+            file_bast.save(save_path)
+            bast_path = save_path.replace("\\", "/")
+
+        # Tentukan nilai akhir file_bast
+        if hapus_bast:
+            data_baru["file_bast"] = None
+        elif file_bast and file_bast.filename:
+            data_baru["file_bast"] = bast_path
+        else:
+            data_baru["file_bast"] = barang.get("file_bast")
+
+        # =====================================================
+        # Simpan ke database
+        update_barang(barang_id, data_baru)
+        flash("Data barang berhasil diperbarui beserta file-nya", "success")
+        return redirect(url_for('ruangan.detail', ruangan_id=data_baru["ruangan_id"]))
+
+    # GET request
+    return render_template('edit_barang.html', barang=barang, ruangan_list=ruangan_list)

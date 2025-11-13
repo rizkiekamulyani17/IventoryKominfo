@@ -31,7 +31,6 @@ def barang_rusak(kategori=None):
 
     # Ambil data dari database otomatis
     barang_list = get_barang_rusak_berat(db)
-
     # Jika difilter berdasarkan kategori
     if kategori and kategori != "Semua":
         barang_list = [b for b in barang_list if b.get("kategori") == kategori]
@@ -56,7 +55,7 @@ def barang_rusak(kategori=None):
 
 #     # Gabungkan keduanya (bisa ditandai dengan flag asal data)
 #     for b in barang_selesai_lelang:
-#         b["asal_data"] = "barang_lelang"
+#         b["asal_data"] = "barang_lelang"-
 
 #     for b in barang_rusak_berat:
 #         b["asal_data"] = "barang"

@@ -287,6 +287,8 @@ def download_qris_ruangan(ruangan_id):
 #         flash("Tidak ada barang di ruangan ini")
 #         return redirect(url_for('ruangan.detail', ruangan_id=ruangan_id))
 
+
+
 #     # Buat zip di memori
 #     memory_file = BytesIO()
 #     with zipfile.ZipFile(memory_file, 'w') as zf:
