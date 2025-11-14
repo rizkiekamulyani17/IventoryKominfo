@@ -160,78 +160,13 @@ def detail(ruangan_id):
 
 #     filename = f"{ruangan['nama_ruangan'].replace(' ', '_')}.png"
 #     return send_file(file_path, as_attachment=True, download_name=filename)
-# from flask import send_file, abort
-# from PIL import Image, ImageDraw, ImageFont
-# import os
-# from io import BytesIO
-# import textwrap
-
-# @ruangan_bp.route('/download_qris/<ruangan_id>')
-# @login_or_token_required
-# def download_qris_ruangan(ruangan_id):
-#     ruangan = get_ruangan_by_id(ruangan_id)
-#     if not ruangan or not ruangan.get('qris_path'):
-#         abort(404)
-
-#     file_path = ruangan['qris_path']  # contoh: "static/qris/UUID.png"
-#     if not os.path.exists(file_path):
-#         abort(404)
-
-#     # 🔹 Buka gambar QR
-#     img = Image.open(file_path).convert("RGB")
-
-#     # 🔹 Siapkan font
-#     try:
-#         font = ImageFont.truetype("arial.ttf", 20)
-#     except:
-#         font = ImageFont.load_default()
-
-#     # 🔹 Bungkus teks agar tidak kepotong
-#     text = ruangan['nama_ruangan']
-#     max_width_chars = 25  # jumlah karakter per baris sebelum dibungkus
-#     wrapped_text = "\n".join(textwrap.wrap(text, width=max_width_chars))
-
-#     # 🔹 Hitung tinggi teks total menggunakan textbbox (Pillow ≥ 10)
-#     dummy_img = Image.new("RGB", (10, 10))
-#     draw_dummy = ImageDraw.Draw(dummy_img)
-
-#     lines = wrapped_text.split("\n")
-#     text_height = 0
-#     for line in lines:
-#         bbox = draw_dummy.textbbox((0, 0), line, font=font)
-#         text_height += (bbox[3] - bbox[1]) + 5  # tinggi tiap baris + jarak antarbaris
-
-#     # 🔹 Siapkan kanvas baru
-#     width, height = img.size
-#     extra_height = text_height + 40
-#     new_img = Image.new("RGB", (width, height + extra_height), "white")
-
-#     # 🔹 Gambar teks di atas QR
-#     draw = ImageDraw.Draw(new_img)
-#     y_offset = 20
-#     for line in lines:
-#         bbox = draw.textbbox((0, 0), line, font=font)
-#         line_width = bbox[2] - bbox[0]
-#         x = (width - line_width) / 2
-#         draw.text((x, y_offset), line, fill="black", font=font)
-#         y_offset += (bbox[3] - bbox[1]) + 5
-
-#     # 🔹 Tempel QR di bawah teks
-#     new_img.paste(img, (0, extra_height))
-
-#     # 🔹 Simpan ke buffer dan kirim
-#     output = BytesIO()
-#     new_img.save(output, format="PNG")
-#     output.seek(0)
-
-#     filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.png"
-#     return send_file(output, as_attachment=True, download_name=filename, mimetype='image/png')
-
 from flask import send_file, abort
-from fpdf import FPDF
-import os, tempfile
+from PIL import Image, ImageDraw, ImageFont
+import os
+from io import BytesIO
+import textwrap
 
-@ruangan_bp.route('/download_qris_ruangan/<ruangan_id>')
+@ruangan_bp.route('/download_qris/<ruangan_id>')
 @login_or_token_required
 def download_qris_ruangan(ruangan_id):
     ruangan = get_ruangan_by_id(ruangan_id)
@@ -242,31 +177,99 @@ def download_qris_ruangan(ruangan_id):
     if not os.path.exists(file_path):
         abort(404)
 
-    # ✅ Siapkan PDF ukuran A5
-    pdf = FPDF(orientation='P', unit='mm', format='A5')
-    pdf.add_page()
+    # 🔹 Buka gambar QR
+    img = Image.open(file_path).convert("RGB")
 
-    # 🔹 Judul
-    pdf.set_font("Arial", 'B', 16)
-    pdf.multi_cell(0, 8, f"QRIS Ruangan - {ruangan['nama_ruangan']}", align='C')
-    pdf.ln(1)
+    # 🔹 Siapkan font
+    try:
+        font = ImageFont.truetype("static/fonts/ARIAL.TTF", 30)
 
-    # 🔹 Tambahkan QR di tengah halaman
-    qr_width = 70
-    page_width = 148  # lebar A5 dalam mm
-    x_center = (page_width - qr_width) / 2
-    y_pos = pdf.get_y()
-    pdf.image(file_path, x=x_center, y=y_pos, w=qr_width, h=qr_width)
 
-    # ✅ Simpan ke file sementara agar aman di server Linux
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
-    pdf.output(tmp.name)
 
-    # 🔹 Siapkan nama file download
-    filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.pdf"
+    except:
+        font = ImageFont.load_default()
 
-    # ✅ Kirim file ke client
-    return send_file(tmp.name, as_attachment=True, download_name=filename, mimetype='application/pdf')
+    # 🔹 Bungkus teks agar tidak kepotong
+    text = ruangan['nama_ruangan']
+    max_width_chars = 18  # jumlah karakter per baris sebelum dibungkus
+    wrapped_text = "\n".join(textwrap.wrap(text, width=max_width_chars))
+
+    # 🔹 Hitung tinggi teks total menggunakan textbbox (Pillow ≥ 10)
+    dummy_img = Image.new("RGB", (10, 10))
+    draw_dummy = ImageDraw.Draw(dummy_img)
+
+    lines = wrapped_text.split("\n")
+    text_height = 0
+    for line in lines:
+        bbox = draw_dummy.textbbox((0, 0), line, font=font)
+        text_height += (bbox[3] - bbox[1]) + 5  # tinggi tiap baris + jarak antarbaris
+
+    # 🔹 Siapkan kanvas baru
+    width, height = img.size
+    extra_height = text_height + 40
+    new_img = Image.new("RGB", (width, height + extra_height), "white")
+
+    # 🔹 Gambar teks di atas QR
+    draw = ImageDraw.Draw(new_img)
+    y_offset = 20
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        line_width = bbox[2] - bbox[0]
+        x = (width - line_width) / 2
+        draw.text((x, y_offset), line, fill="black", font=font)
+        y_offset += (bbox[3] - bbox[1]) + 5
+
+    # 🔹 Tempel QR di bawah teks
+    new_img.paste(img, (0, extra_height))
+
+    # 🔹 Simpan ke buffer dan kirim
+    output = BytesIO()
+    new_img.save(output, format="PNG")
+    output.seek(0)
+
+    filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.png"
+    return send_file(output, as_attachment=True, download_name=filename, mimetype='image/png')
+
+# from flask import send_file, abort
+# from fpdf import FPDF
+# import os, tempfile
+
+# @ruangan_bp.route('/download_qris_ruangan/<ruangan_id>')
+# @login_or_token_required
+# def download_qris_ruangan(ruangan_id):
+#     ruangan = get_ruangan_by_id(ruangan_id)
+#     if not ruangan or not ruangan.get('qris_path'):
+#         abort(404)
+
+#     file_path = ruangan['qris_path']  # contoh: "static/qris/UUID.png"
+#     if not os.path.exists(file_path):
+#         abort(404)
+
+#     # ✅ Siapkan PDF ukuran A5
+#     pdf = FPDF(orientation='P', unit='mm', format='A5')
+#     pdf.add_page()
+
+#     # 🔹 Judul
+#     pdf.set_font("Arial", 'B', 16)
+#     pdf.multi_cell(0, 8, f"QRIS Ruangan - {ruangan['nama_ruangan']}", align='C')
+#     pdf.ln(1)
+
+#     # 🔹 Tambahkan QR di tengah halaman
+#     qr_width = 70
+#     page_width = 148  # lebar A5 dalam mm
+#     x_center = (page_width - qr_width) / 2
+#     y_pos = pdf.get_y()
+#     pdf.image(file_path, x=x_center, y=y_pos, w=qr_width, h=qr_width)
+
+#     # ✅ Simpan ke file sementara agar aman di server Linux
+#     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+#     pdf.output(tmp.name)
+
+#     # 🔹 Siapkan nama file download
+#     filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.pdf"
+
+#     # ✅ Kirim file ke client
+#     return send_file(tmp.name, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
 
 # @ruangan_bp.route('/download_semua_qris/<ruangan_id>')
