@@ -164,71 +164,65 @@ from flask import send_file, abort
 from PIL import Image, ImageDraw, ImageFont
 import os
 from io import BytesIO
-import textwrap
 
 @ruangan_bp.route('/download_qris/<ruangan_id>')
 @login_or_token_required
-def download_qris_ruangan(ruangan_id):
+def download_qris(ruangan_id):
     ruangan = get_ruangan_by_id(ruangan_id)
     if not ruangan or not ruangan.get('qris_path'):
         abort(404)
 
-    file_path = ruangan['qris_path']  # contoh: "static/qris/UUID.png"
+    file_path = ruangan['qris_path']
     if not os.path.exists(file_path):
         abort(404)
 
-    # 🔹 Buka gambar QR
-    img = Image.open(file_path).convert("RGB")
+    # Buka QR code
+    qr_img = Image.open(file_path).convert("RGB")
 
-    # 🔹 Siapkan font
-    try:
-        font = ImageFont.truetype("static/fonts/ARIAL.TTF", 30)
+    # Font default (Aman untuk hosting)
+    font = ImageFont.load_default()
 
+    # Judul
+    text = ruangan["nama_ruangan"]
 
+    # Hitung ukuran teks (Pillow >= 10 pakai textbbox)
+    temp_img = Image.new("RGB", (10, 10))
+    temp_draw = ImageDraw.Draw(temp_img)
 
-    except:
-        font = ImageFont.load_default()
+    bbox = temp_draw.textbbox((0, 0), text, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
 
-    # 🔹 Bungkus teks agar tidak kepotong
-    text = ruangan['nama_ruangan']
-    max_width_chars = 18  # jumlah karakter per baris sebelum dibungkus
-    wrapped_text = "\n".join(textwrap.wrap(text, width=max_width_chars))
+    qr_width, qr_height = qr_img.size
 
-    # 🔹 Hitung tinggi teks total menggunakan textbbox (Pillow ≥ 10)
-    dummy_img = Image.new("RGB", (10, 10))
-    draw_dummy = ImageDraw.Draw(dummy_img)
+    total_width = qr_width
+    total_height = text_height + 40 + qr_height
 
-    lines = wrapped_text.split("\n")
-    text_height = 0
-    for line in lines:
-        bbox = draw_dummy.textbbox((0, 0), line, font=font)
-        text_height += (bbox[3] - bbox[1]) + 5  # tinggi tiap baris + jarak antarbaris
-
-    # 🔹 Siapkan kanvas baru
-    width, height = img.size
-    extra_height = text_height + 40
-    new_img = Image.new("RGB", (width, height + extra_height), "white")
-
-    # 🔹 Gambar teks di atas QR
+    # Buat kanvas baru
+    new_img = Image.new("RGB", (total_width, total_height), "white")
     draw = ImageDraw.Draw(new_img)
-    y_offset = 20
-    for line in lines:
-        bbox = draw.textbbox((0, 0), line, font=font)
-        line_width = bbox[2] - bbox[0]
-        x = (width - line_width) / 2
-        draw.text((x, y_offset), line, fill="black", font=font)
-        y_offset += (bbox[3] - bbox[1]) + 5
 
-    # 🔹 Tempel QR di bawah teks
-    new_img.paste(img, (0, extra_height))
+    # Posisi teks di tengah
+    x_text = (total_width - text_width) // 2
+    draw.text((x_text, 20), text, fill="black", font=font)
 
-    # 🔹 Simpan ke buffer dan kirim
+    # Tempel QR
+    new_img.paste(qr_img, (0, text_height + 40))
+
+    # Output buffer
     output = BytesIO()
     new_img.save(output, format="PNG")
     output.seek(0)
 
     filename = f"QRIS_{ruangan['nama_ruangan'].replace(' ', '_')}.png"
-    return send_file(output, as_attachment=True, download_name=filename, mimetype='image/png')
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="image/png"
+    )
+
 
 # from flask import send_file, abort
 # from fpdf import FPDF
