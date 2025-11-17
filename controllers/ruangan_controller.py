@@ -164,10 +164,11 @@ from flask import send_file, abort
 from PIL import Image, ImageDraw, ImageFont
 import os
 from io import BytesIO
+import textwrap
 
 @ruangan_bp.route('/download_qris/<ruangan_id>')
 @login_or_token_required
-def download_qris(ruangan_id):
+def download_qris_ruangan(ruangan_id):
     ruangan = get_ruangan_by_id(ruangan_id)
     if not ruangan or not ruangan.get('qris_path'):
         abort(404)
@@ -179,35 +180,58 @@ def download_qris(ruangan_id):
     # Buka QR code
     qr_img = Image.open(file_path).convert("RGB")
 
-    # Font default (Aman untuk hosting)
-    font = ImageFont.load_default()
+    # ===========================================================
+    # 🔹 Coba pakai ARIAL.TTF, kalau gagal -> default
+    # ===========================================================
+    font_path = os.path.join("static", "fonts", "ARIAL.TTF")
+    try:
+        font = ImageFont.truetype(font_path, 32)
+    except:
+        font = ImageFont.load_default()
+    # ===========================================================
 
     # Judul
     text = ruangan["nama_ruangan"]
 
-    # Hitung ukuran teks (Pillow >= 10 pakai textbbox)
+    # 🔹 Bungkus teks jika terlalu panjang
+    wrapped_lines = textwrap.wrap(text, width=20)  # <= atur panjang per baris
+
+    # Hitung tinggi seluruh teks
     temp_img = Image.new("RGB", (10, 10))
     temp_draw = ImageDraw.Draw(temp_img)
 
-    bbox = temp_draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    line_heights = []
+    max_text_width = 0
+
+    for line in wrapped_lines:
+        bbox = temp_draw.textbbox((0, 0), line, font=font)
+        w = bbox[2] - bbox[0]
+        h = bbox[3] - bbox[1]
+        line_heights.append(h)
+        max_text_width = max(max_text_width, w)
+
+    total_text_height = sum(line_heights) + (5 * len(wrapped_lines))  # jarak antar baris
 
     qr_width, qr_height = qr_img.size
 
     total_width = qr_width
-    total_height = text_height + 40 + qr_height
+    total_height = total_text_height + 40 + qr_height
 
     # Buat kanvas baru
     new_img = Image.new("RGB", (total_width, total_height), "white")
     draw = ImageDraw.Draw(new_img)
 
-    # Posisi teks di tengah
-    x_text = (total_width - text_width) // 2
-    draw.text((x_text, 20), text, fill="black", font=font)
+    # Render teks baris-per-baris
+    y = 20
+    for i, line in enumerate(wrapped_lines):
+        bbox = draw.textbbox((0, 0), line, font=font)
+        line_width = bbox[2] - bbox[0]
+        x = (total_width - line_width) // 2
+        draw.text((x, y), line, fill="black", font=font)
+        y += line_heights[i] + 5
 
-    # Tempel QR
-    new_img.paste(qr_img, (0, text_height + 40))
+    # Tempel QR di bawah teks
+    new_img.paste(qr_img, (0, y))
 
     # Output buffer
     output = BytesIO()
@@ -228,9 +252,9 @@ def download_qris(ruangan_id):
 # from fpdf import FPDF
 # import os, tempfile
 
-# @ruangan_bp.route('/download_qris_ruangan/<ruangan_id>')
+# @ruangan_bp.route('/download_qris/<ruangan_id>')
 # @login_or_token_required
-# def download_qris_ruangan(ruangan_id):
+# def download_qris(ruangan_id):
 #     ruangan = get_ruangan_by_id(ruangan_id)
 #     if not ruangan or not ruangan.get('qris_path'):
 #         abort(404)
