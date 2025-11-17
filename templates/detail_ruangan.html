@@ -19,7 +19,7 @@
     <!-- Tombol Download -->
     {% if session.get('username') %}
     <div class="mb-4 d-flex gap-2">
-        <a href="{{ url_for('ruangan.download_qris_ruangan', ruangan_id=ruangan['_id']) }}" 
+        <a href="{{ url_for('ruangan.download_qris', ruangan_id=ruangan['_id']) }}" 
            class="btn btn-danger">
            <i class="bi bi-qr-code me-1"></i> Download QR Code
         </a>

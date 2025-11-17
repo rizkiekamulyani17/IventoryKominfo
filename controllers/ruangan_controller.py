@@ -168,7 +168,7 @@ import textwrap
 
 @ruangan_bp.route('/download_qris/<ruangan_id>')
 @login_or_token_required
-def download_qris_ruangan(ruangan_id):
+def download_qris(ruangan_id):
     ruangan = get_ruangan_by_id(ruangan_id)
     if not ruangan or not ruangan.get('qris_path'):
         abort(404)
